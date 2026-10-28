@@ -54,6 +54,16 @@ func SetApiRouter(router *gin.Engine) {
 		// Universal secure verification routes
 		apiRouter.POST("/verify", middleware.UserAuth(), middleware.CriticalRateLimit(), controller.UniversalVerify)
 
+		approvalRoute := apiRouter.Group("/registration")
+		approvalRoute.Use(middleware.RootAuth(), middleware.DisableCache())
+		{
+			approvalRoute.GET("/", controller.GetRegistrationApprovals)
+			approvalRoute.POST("/invitations", middleware.CriticalRateLimit(), controller.CreateRegistrationInvitation)
+			approvalRoute.POST("/invitations/:id/revoke", controller.RevokeRegistrationInvitation)
+			approvalRoute.POST("/requests/:id/review", controller.ReviewRegistrationRequest)
+			approvalRoute.POST("/requests/:id/notify", middleware.CriticalRateLimit(), controller.NotifyRegistrationRequest)
+		}
+
 		userRoute := apiRouter.Group("/user")
 		{
 			userRoute.POST("/register", middleware.CriticalRateLimit(), middleware.TurnstileCheck(), controller.Register)

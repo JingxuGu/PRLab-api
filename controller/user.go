@@ -135,6 +135,10 @@ func Logout(c *gin.Context) {
 }
 
 func Register(c *gin.Context) {
+	if common.InvitationRegistrationEnabled() {
+		RegisterWithInvitation(c)
+		return
+	}
 	if !common.RegisterEnabled {
 		common.ApiErrorI18n(c, i18n.MsgUserRegisterDisabled)
 		return

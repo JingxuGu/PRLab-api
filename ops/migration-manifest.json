@@ -1,0 +1,465 @@
+{
+  "schema_version": 1,
+  "migration_date": "2026-10-28",
+  "source_commit": "e320ce3b5ceb7465ead5465aede5c76e08d6272f",
+  "source_file_count": 57,
+  "scope": "Complete tracked snapshot; public examples replace deployment identifiers; original Git history excluded.",
+  "files": [
+    {
+      "source_path": ".gitattributes",
+      "destination_path": "ops/.gitattributes",
+      "source_sha256": "d60f352d0db1404c70afb4bb8b2ca3fd1c610572aa40720e8a0b7baa7885418c",
+      "public_sha256": "d60f352d0db1404c70afb4bb8b2ca3fd1c610572aa40720e8a0b7baa7885418c",
+      "modified_for_public_migration": false,
+      "mode": "0644"
+    },
+    {
+      "source_path": ".githooks/pre-commit",
+      "destination_path": "ops/.githooks/pre-commit",
+      "source_sha256": "89e3261fea061018fa412af74e0963b81389228a18f2cb579ffed274591fb5d0",
+      "public_sha256": "11cfb965033c019f8417eeee4c2747cfd15ed345b774f5e4c69aef1bbfdc91de",
+      "modified_for_public_migration": true,
+      "mode": "0755"
+    },
+    {
+      "source_path": ".gitignore",
+      "destination_path": "ops/.gitignore",
+      "source_sha256": "39773d7f68da0f5c1dc849f86fb0c6e5b255cffb87c97b3660c0485ebcafa0ce",
+      "public_sha256": "de38842451920d37e565e8d8efa3247e6016e0bd39626d93a3d21ffb29ac873d",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "README.md",
+      "destination_path": "ops/README.md",
+      "source_sha256": "123c38c6ad9b7d9b29ba4c5ae9a5ad4dec9bfb70155f15d84df89cea1af982be",
+      "public_sha256": "e9055761e527872a80ff914195380998d97ca876d2b7df4a026343ef587c9062",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "docs/RECOVERY.md",
+      "destination_path": "ops/docs/RECOVERY.md",
+      "source_sha256": "4481a7009508a101f920621b962752d7eb600263eb394ffa6a11f260bb324268",
+      "public_sha256": "013b508a7e09a8ebcec26125e69c68a6382f2a7591f0475126faf546e81b9fb8",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "docs/SECRETS.md",
+      "destination_path": "ops/docs/SECRETS.md",
+      "source_sha256": "f71d1583a29734e0ff93bee04d54dc388a4226cb94c43f2105db078ad8e6e8b0",
+      "public_sha256": "c638b9cc1cf732c42a57f0a9cab2821a851f96d48e397b15126552b94db29372",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "docs/STATUS.md",
+      "destination_path": "ops/docs/STATUS.md",
+      "source_sha256": "56987d266c155e84ddf22d11d10cdbbf0f0898391a013400e0eca0e5299877af",
+      "public_sha256": "d46ae79786841290ebc27ee3b7754f5b3b2986014b9e005c38a295bf1f7f8075",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "docs/evidence/new-api/api-verification.json",
+      "destination_path": "ops/docs/evidence/new-api/api-verification.json",
+      "source_sha256": "71636941574faa3daf0395b7702f13f736e9063f1ba3d30c542e5455bf7cd9e7",
+      "public_sha256": "71636941574faa3daf0395b7702f13f736e9063f1ba3d30c542e5455bf7cd9e7",
+      "modified_for_public_migration": false,
+      "mode": "0644"
+    },
+    {
+      "source_path": "docs/evidence/new-api/public-verification.json",
+      "destination_path": "ops/docs/evidence/new-api/public-verification.json",
+      "source_sha256": "299533a52739f227aa173b9176ef9d7cf7097886d777336eb51b4a090f1510f0",
+      "public_sha256": "299533a52739f227aa173b9176ef9d7cf7097886d777336eb51b4a090f1510f0",
+      "modified_for_public_migration": false,
+      "mode": "0644"
+    },
+    {
+      "source_path": "docs/evidence/new-api/state-verification.json",
+      "destination_path": "ops/docs/evidence/new-api/state-verification.json",
+      "source_sha256": "f4fd7d0bd9bedd73d8535b41e3c1e3bf2de28a269103b929e743a413da56d6dc",
+      "public_sha256": "e953dbd3c9c6d67382a2bc71ec911f26528df06ea39573664b1b12f71049114d",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "docs/evidence/slurm/preemption-result.json",
+      "destination_path": "ops/docs/evidence/slurm/preemption-result.json",
+      "source_sha256": "5ec854efcbc447a46375a6cf7925caf0666abf4ac97dce79ac7d727938bff19d",
+      "public_sha256": "11ca3747d112429afe4538403c92cbf0080c1ac2c6949b0af7db9afefad70a9a",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "docs/evidence/vllm/api-verification.json",
+      "destination_path": "ops/docs/evidence/vllm/api-verification.json",
+      "source_sha256": "1334a63743c0acc94b1222f067756bbeea94b5684ea7853c918da65ed4fad723",
+      "public_sha256": "1334a63743c0acc94b1222f067756bbeea94b5684ea7853c918da65ed4fad723",
+      "modified_for_public_migration": false,
+      "mode": "0644"
+    },
+    {
+      "source_path": "docs/evidence/vllm/model-verified.json",
+      "destination_path": "ops/docs/evidence/vllm/model-verified.json",
+      "source_sha256": "ed4a14d9b60d8c1cd6d309c29e3ddd1c57dceacd4dc4089925e99f17e077a9dd",
+      "public_sha256": "ed4a14d9b60d8c1cd6d309c29e3ddd1c57dceacd4dc4089925e99f17e077a9dd",
+      "modified_for_public_migration": false,
+      "mode": "0644"
+    },
+    {
+      "source_path": "docs/evidence/vllm/preemption-verification.json",
+      "destination_path": "ops/docs/evidence/vllm/preemption-verification.json",
+      "source_sha256": "547da6eea12297a9122a1d896f56e73580e33f3ac0a4f38eb56ff70845112ff9",
+      "public_sha256": "547da6eea12297a9122a1d896f56e73580e33f3ac0a4f38eb56ff70845112ff9",
+      "modified_for_public_migration": false,
+      "mode": "0644"
+    },
+    {
+      "source_path": "docs/new-api-operations.md",
+      "destination_path": "ops/docs/new-api-operations.md",
+      "source_sha256": "1ae0b1e6ea5966138c7144fa85346700ae22780f0ed610ac234613aca73dc0bd",
+      "public_sha256": "77893817bbeb5949d2f744c9cef0d0a4912683d97ad47b25a8b32dea4545cb5d",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "docs/prlab-customization.md",
+      "destination_path": "ops/docs/prlab-customization.md",
+      "source_sha256": "914a2679d95d6a53d04ec71c6e229370d75dc4846eee839f48a3f0942f16c961",
+      "public_sha256": "aabdffabb88a5f9e083b388cc2a71d56b06b0c746aa84fac19144155f3f7ac81",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "docs/slurm-operations.txt",
+      "destination_path": "ops/docs/slurm-operations.txt",
+      "source_sha256": "ed4a0a78194b29100dfcc3303dc3b6226ebd6033b84df8cdc238ac61691a8c0e",
+      "public_sha256": "2b813c706f2408cbea6d49159e3463eb555c32ada2c0edbada8c85281f188066",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "docs/vllm-operations.txt",
+      "destination_path": "ops/docs/vllm-operations.txt",
+      "source_sha256": "7bd2ef94630de71467c1623e423a7f10b46160e8d693865c7ddf6c415d23eb29",
+      "public_sha256": "bb7d3a6fbb9b21974920cc507b5d2fca0ce2a215098f899826d2323900c93336",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "new-api/bin/activate-tunnel",
+      "destination_path": "ops/new-api/bin/activate-tunnel",
+      "source_sha256": "85e89e9ed9535ea8c15bc977205f98d4d0585045382ac35e98bfab9a269e8517",
+      "public_sha256": "419041ec51024a85f82bad51f86340e47a91dd08fc8b6fef5f962d6024ab5a81",
+      "modified_for_public_migration": true,
+      "mode": "0755"
+    },
+    {
+      "source_path": "new-api/bin/backup-db.py",
+      "destination_path": "ops/new-api/bin/backup-db.py",
+      "source_sha256": "ddbc7b44edc50bbc045070fa0fbcd6c87f8987a822cd0c4055a947fa66f68e7e",
+      "public_sha256": "d9fed3622c24e119707bf0c48c5fe76ae2e1e7413ff176482987d3dfbfd24437",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "new-api/config/create-env.py",
+      "destination_path": "ops/new-api/config/create-env.py",
+      "source_sha256": "4707b5fa148d323abd16dcdcb566983f2d0626618cab388cf0e6833e33cfb85d",
+      "public_sha256": "a8654c38cc1afe92de746ebd8c7d653b389fe700240ee04b719aeadbcdb0d8a6",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "new-api/config/initialize.py",
+      "destination_path": "ops/new-api/config/initialize.py",
+      "source_sha256": "f17459d27be47b02e18ada9a52993da9448987042531b16bbab8a26919ed1de7",
+      "public_sha256": "916f2fd44312e8dfdfbaf0c1de59e913fdb59fbf117a24ccbcbe50620f2918f6",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "new-api/config/release.json",
+      "destination_path": "ops/new-api/config/release.json",
+      "source_sha256": "161a2e9b54f544d02ae87d44ffa0a8dc30d3164471e63e575d6a60860399aae6",
+      "public_sha256": "161a2e9b54f544d02ae87d44ffa0a8dc30d3164471e63e575d6a60860399aae6",
+      "modified_for_public_migration": false,
+      "mode": "0644"
+    },
+    {
+      "source_path": "new-api/systemd/new-api-cloudflared.service",
+      "destination_path": "ops/new-api/systemd/new-api-cloudflared.service",
+      "source_sha256": "19976a96888020604ddf70945cadf4343e80a8b581cf8734d5804905420f1241",
+      "public_sha256": "997e124b283208dff7ee2304c5e3a890f788828df314c19e6cdc3f11140b105b",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "new-api/systemd/new-api.service",
+      "destination_path": "ops/new-api/systemd/new-api.service",
+      "source_sha256": "68c3be762bbff6229824d90cbb0c0c90a7075902585a2c38d1cc2b2ffbb7270e",
+      "public_sha256": "f1dd1da7143aec490402ef3ad1dd8a3ff8ef496cf2150fe37843faa458af12de",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "new-api/tests/inspect-state.py",
+      "destination_path": "ops/new-api/tests/inspect-state.py",
+      "source_sha256": "66998169275069118c590b3e5757f0312aaf93a16473419485e14e5a6f63ecf9",
+      "public_sha256": "bd718c0c8403a0dbfa007f67b3e0e7989797a740157b80b9a3c7403985d6bb0f",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "new-api/tests/verify-api.py",
+      "destination_path": "ops/new-api/tests/verify-api.py",
+      "source_sha256": "32835b80fc86e61249ca69ed7add73bee2154ccd2254e7e62567d6dd6c4e0b35",
+      "public_sha256": "4de9c2009f78016e3efe12f1bb9f75533754de12e4a53f8f21c04e8718ced892",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "scripts/validate.py",
+      "destination_path": "ops/scripts/validate.py",
+      "source_sha256": "472a156fdac43a95fb0cbc18d961f4245869b2b5dbbe5fb1fbe35df164e9eb07",
+      "public_sha256": "472a156fdac43a95fb0cbc18d961f4245869b2b5dbbe5fb1fbe35df164e9eb07",
+      "modified_for_public_migration": false,
+      "mode": "0644"
+    },
+    {
+      "source_path": "slurm/config/cgroup.conf",
+      "destination_path": "ops/slurm/config/cgroup.conf",
+      "source_sha256": "f0d7981064dd9d44f588b18c58035c752ee88eb90a998828dbecfad0f1042a8e",
+      "public_sha256": "f0d7981064dd9d44f588b18c58035c752ee88eb90a998828dbecfad0f1042a8e",
+      "modified_for_public_migration": false,
+      "mode": "0644"
+    },
+    {
+      "source_path": "slurm/config/gpu-idle-prolog.sh",
+      "destination_path": "ops/slurm/config/gpu-idle-prolog.sh",
+      "source_sha256": "c234a149403bb8f3dc3623589b4ebf9a81f1ec2432ae27eb1c72dda6186d3715",
+      "public_sha256": "c234a149403bb8f3dc3623589b4ebf9a81f1ec2432ae27eb1c72dda6186d3715",
+      "modified_for_public_migration": false,
+      "mode": "0755"
+    },
+    {
+      "source_path": "slurm/config/gres.conf",
+      "destination_path": "ops/slurm/config/gres.conf",
+      "source_sha256": "f0900d82d5d5f34140a288ae2a554923e2270a23a4584f7425184d9b2c9b276e",
+      "public_sha256": "f6fd9337c7b1038eac1c91dbd6a48a4052f2d0ad50773e3ab48f2b9278014f11",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "slurm/config/slurm.conf",
+      "destination_path": "ops/slurm/config/slurm.conf",
+      "source_sha256": "059b78faf98aaa78055df32354f880796cd2496c4e308c8d041575e8a06973c4",
+      "public_sha256": "20c569cef857c696cdaf1adc7498fb6459789e3faa4c64e2dc414183f3da20bf",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "slurm/config/slurmctld.service",
+      "destination_path": "ops/slurm/config/slurmctld.service",
+      "source_sha256": "b35e4361e195a5520768daefcdb53a039296e96bc9e62dc48f57082e9f3e9de7",
+      "public_sha256": "b35e4361e195a5520768daefcdb53a039296e96bc9e62dc48f57082e9f3e9de7",
+      "modified_for_public_migration": false,
+      "mode": "0644"
+    },
+    {
+      "source_path": "slurm/config/slurmd.service",
+      "destination_path": "ops/slurm/config/slurmd.service",
+      "source_sha256": "7dde4c767e867dbda2e43c45d5c4c644031efc469d8f4fa74fefa2218c39cc98",
+      "public_sha256": "7dde4c767e867dbda2e43c45d5c4c644031efc469d8f4fa74fefa2218c39cc98",
+      "modified_for_public_migration": false,
+      "mode": "0644"
+    },
+    {
+      "source_path": "slurm/examples/research-gpu.sbatch",
+      "destination_path": "ops/slurm/examples/research-gpu.sbatch",
+      "source_sha256": "a5acf62ffe2d86466b3e3b70c43533b762f2d887c1f9275b100a01b162f722ea",
+      "public_sha256": "a5acf62ffe2d86466b3e3b70c43533b762f2d887c1f9275b100a01b162f722ea",
+      "modified_for_public_migration": false,
+      "mode": "0644"
+    },
+    {
+      "source_path": "slurm/scripts/build-slurm.sh",
+      "destination_path": "ops/slurm/scripts/build-slurm.sh",
+      "source_sha256": "d4cc49ee40f05b4d7db60aa94870a96d92a3217626ebb9d19ea730e2db2b5544",
+      "public_sha256": "2807b01b248829ffb18f3b970cf778abc6c4383ae1696771c15eedad1e595077",
+      "modified_for_public_migration": true,
+      "mode": "0755"
+    },
+    {
+      "source_path": "slurm/scripts/configure-slurm.sh",
+      "destination_path": "ops/slurm/scripts/configure-slurm.sh",
+      "source_sha256": "49c2ea6ad39094e8854a435fba2808f85c61040be610fb2fc2f4d9406cb77119",
+      "public_sha256": "e7581c1951760022b1e283891fbe0896acb1f80874473160f130db00e18166fb",
+      "modified_for_public_migration": true,
+      "mode": "0755"
+    },
+    {
+      "source_path": "slurm/tests/audit-preemption-result.py",
+      "destination_path": "ops/slurm/tests/audit-preemption-result.py",
+      "source_sha256": "3f09af7b9de3be58703051081fc4a0a498826310b6dea35499d93ece8203ea3d",
+      "public_sha256": "5ce7af1303c252f61da405b842e16d2aa20ed67397d176781091e5d10d643de1",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "slurm/tests/check-gpu.py",
+      "destination_path": "ops/slurm/tests/check-gpu.py",
+      "source_sha256": "405b6284e5d984843ccb7fd11edd1d527bfdfc375be90149630f7f7e5ef94ecb",
+      "public_sha256": "405b6284e5d984843ccb7fd11edd1d527bfdfc375be90149630f7f7e5ef94ecb",
+      "modified_for_public_migration": false,
+      "mode": "0644"
+    },
+    {
+      "source_path": "slurm/tests/check-isolation.py",
+      "destination_path": "ops/slurm/tests/check-isolation.py",
+      "source_sha256": "eb495ec4e826cf6086ef2b827521d50c80bf53fbe79c7f2f79ebb4ca9d1c9f76",
+      "public_sha256": "eb495ec4e826cf6086ef2b827521d50c80bf53fbe79c7f2f79ebb4ca9d1c9f76",
+      "modified_for_public_migration": false,
+      "mode": "0644"
+    },
+    {
+      "source_path": "slurm/tests/preemption-low.sbatch",
+      "destination_path": "ops/slurm/tests/preemption-low.sbatch",
+      "source_sha256": "82526bfc2e525e1bd84fbb90e94727e9e9f0ab00fac51598474d34a1fb24e7f4",
+      "public_sha256": "82526bfc2e525e1bd84fbb90e94727e9e9f0ab00fac51598474d34a1fb24e7f4",
+      "modified_for_public_migration": false,
+      "mode": "0644"
+    },
+    {
+      "source_path": "slurm/tests/verify-busy-guard.py",
+      "destination_path": "ops/slurm/tests/verify-busy-guard.py",
+      "source_sha256": "6acdcad476e2d939f4a9b12eecaa1249a7babc53dfd4fada241b9f797c40d03d",
+      "public_sha256": "2d2b050269419629f59d1a3ba67175fc663680d608ab93628a3a9509020dbcd6",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "slurm/tests/verify-preemption.py",
+      "destination_path": "ops/slurm/tests/verify-preemption.py",
+      "source_sha256": "dc515ce67d46f2eac6475bfdd4d3ce1aaab7dc598a95343fa0f3dfcc6e7ccb21",
+      "public_sha256": "c89965b9c2cdb9fe28c04b089944cce93f31edc8ff8ddc007aeb5962855d0fd3",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "vllm/bin/download-model.py",
+      "destination_path": "ops/vllm/bin/download-model.py",
+      "source_sha256": "55a681e69d0351c2db6ad8df874464e432e7f5724338756837d44f858e8207a2",
+      "public_sha256": "2a206bad3d1cdfd237448f1b8f7d661286fd146fb0fece3650294b26c18a2164",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "vllm/bin/enable-model.sh",
+      "destination_path": "ops/vllm/bin/enable-model.sh",
+      "source_sha256": "742d89abf74fa26abae98480fd611d5f6fa0ac0188901b90e01e5fadb6a0ac89",
+      "public_sha256": "570f751bfc9957a2c443202eeabe35b8a8fb900072dcbc10268614400a5de272",
+      "modified_for_public_migration": true,
+      "mode": "0755"
+    },
+    {
+      "source_path": "vllm/bin/gateway.py",
+      "destination_path": "ops/vllm/bin/gateway.py",
+      "source_sha256": "5a2fddb9d1ad15460f1638a7a0113e4bc61a8f9258a974173ae6b5c389ada62f",
+      "public_sha256": "83067e4f9a2f29e0d1c9e98c5a8e5febe87b10311d3aca202c8b5cd661ef14ef",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "vllm/bin/submit-service.py",
+      "destination_path": "ops/vllm/bin/submit-service.py",
+      "source_sha256": "add730aceadf29bb0e864f827c8ff1ed413fc6d277446346d5693b1e4ce9d93f",
+      "public_sha256": "db56175ef7b1000b0d812422ebed87c566cb5655272c79ade6f015e6cc9080e4",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "vllm/config/cubin-wheel-links.json",
+      "destination_path": "ops/vllm/config/cubin-wheel-links.json",
+      "source_sha256": "d4a6346df95652bfc5c7174e416a34ad96ceb00e553998b8296f997391bb6c44",
+      "public_sha256": "d4a6346df95652bfc5c7174e416a34ad96ceb00e553998b8296f997391bb6c44",
+      "modified_for_public_migration": false,
+      "mode": "0644"
+    },
+    {
+      "source_path": "vllm/config/jit-wheel-links.json",
+      "destination_path": "ops/vllm/config/jit-wheel-links.json",
+      "source_sha256": "5af3584fd1006986f2ea124053b2094004042d506ed9b7208039a08068335351",
+      "public_sha256": "5af3584fd1006986f2ea124053b2094004042d506ed9b7208039a08068335351",
+      "modified_for_public_migration": false,
+      "mode": "0644"
+    },
+    {
+      "source_path": "vllm/config/model-files.json",
+      "destination_path": "ops/vllm/config/model-files.json",
+      "source_sha256": "5338624c4a6bbf13da2ea8fb10edfcc06e95b0a4f081bd3eafbe56ae3676d374",
+      "public_sha256": "5338624c4a6bbf13da2ea8fb10edfcc06e95b0a4f081bd3eafbe56ae3676d374",
+      "modified_for_public_migration": false,
+      "mode": "0644"
+    },
+    {
+      "source_path": "vllm/config/qwen38-vllm.sbatch",
+      "destination_path": "ops/vllm/config/qwen38-vllm.sbatch",
+      "source_sha256": "343ee375c2bdd77f71f7ae05f567fa12eaa4826b649d02fb9a33dee2de9ad835",
+      "public_sha256": "b435a72fd9f1bc7818f5dab2027074722aaec235e449dc4153a9d457311a4da4",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "vllm/config/requirements.lock.txt",
+      "destination_path": "ops/vllm/config/requirements.lock.txt",
+      "source_sha256": "2a5dbfe124738d18f920d5525e1e06c642e7332658b51c2cc2942bb83431c47c",
+      "public_sha256": "b5a53e4090b87a1b8164513180e70e0b4a6f1d652e8b4bcf5a630f09de8c4a57",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "vllm/systemd/qwen38-gateway.service",
+      "destination_path": "ops/vllm/systemd/qwen38-gateway.service",
+      "source_sha256": "0bc302cdd5b41d60711176af2bcd4db319e19c02d253ee3b15c142b53a778faf",
+      "public_sha256": "5d87e9c5c57f664282959abf27838880337fa1d375a4eeecd35014e6fbbff01a",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "vllm/systemd/qwen38-slurm.service",
+      "destination_path": "ops/vllm/systemd/qwen38-slurm.service",
+      "source_sha256": "f14f4e7623d053f13498ee92626f7f75ac37cf5e341dbf56fa71ad2bb51913c3",
+      "public_sha256": "6424b55d38ad90946a2a4c99912c9ef7aca76d6aa39326dd6fe583d2c935cb34",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "vllm/tests/test-gateway.py",
+      "destination_path": "ops/vllm/tests/test-gateway.py",
+      "source_sha256": "b2f9a5cdeeed85c138ade7511c6ded5311a1f5108f293a2bc6da35fd9b54e343",
+      "public_sha256": "04fa2d43c0781676bf03545bb587a15ebd03b23b5edff46e7d41f3588da39efc",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "vllm/tests/verify-api.py",
+      "destination_path": "ops/vllm/tests/verify-api.py",
+      "source_sha256": "2e3ebd0248e9a9e20bcd1515cac74517bcb4c79e1d222cd315c0fea01bb41d5c",
+      "public_sha256": "9235243b31bd83adc737886b43d6facb8f06131f590102de5369048235f48842",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    },
+    {
+      "source_path": "vllm/tests/verify-preemption.py",
+      "destination_path": "ops/vllm/tests/verify-preemption.py",
+      "source_sha256": "3c35258494e5d3fe8ae989e4e821b1ca47e623de8bf9d8e22d7e2cd3e0557fc8",
+      "public_sha256": "8275589ad4b7aa225f9f84d2afb9ef9f85b586eee9d9112a45a86a8de98538f3",
+      "modified_for_public_migration": true,
+      "mode": "0644"
+    }
+  ]
+}

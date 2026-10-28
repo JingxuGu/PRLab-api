@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "model_job": 16,
+  "research_job": 17,
+  "research_start_seconds": 18.04,
+  "gpu_memory_during_research_mib": 561,
+  "model_restarts_after": 1,
+  "total_test_seconds": 206.51
+}

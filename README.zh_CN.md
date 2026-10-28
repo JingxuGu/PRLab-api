@@ -1,3 +1,5 @@
+> PRLab 运维资料：[维护入口](PRLAB.md) · [部署文档和脚本](ops/README.md)。
+
 <div align="center">
 
 ![new-api](/web/public/logo.png)

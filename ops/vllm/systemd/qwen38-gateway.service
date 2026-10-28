@@ -1,0 +1,22 @@
+[Unit]
+Description=Local Qwen3.8 API gateway with four-request admission limit
+After=network.target
+
+[Service]
+Type=simple
+User=llmops
+Group=llmops
+WorkingDirectory=/home/llmops/llm
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/home/llmops/llm/venv/bin/uvicorn gateway:app --app-dir /home/llmops/llm/bin --host 127.0.0.1 --port 8000 --workers 1 --no-access-log
+Restart=on-failure
+RestartSec=5
+MemoryMax=512M
+CPUQuota=100%
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target

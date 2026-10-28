@@ -1,0 +1,115 @@
+历史记录说明：本文件记录 2026-10-27 的 Slurm 初次部署阶段。
+其 llm=DOWN、未安装模型等描述仅适用于当时；后续模型上线状态见 STATUS.md 与 vllm-operations.txt。
+主机、账户和路径均已替换为公开示例，不代表服务器的实时状态。
+
+llmops 单机 Slurm GPU 调度配置
+配置日期：2026-10-27（Asia/Shanghai）
+
+连接与范围
+  ssh lab-server
+  系统账户：llmops；主机名：llmops；Ubuntu 22.04.5；RTX 5090 32 GB。
+  此次仅配置调度层，没有安装 vLLM、下载 Qwen 模型或开放推理 API。
+
+部署位置
+  Slurm 26.05.5：/opt/slurm/26.05.5
+  专用 hwloc 2.12.2：/opt/slurm-deps/hwloc-2.12.2
+  客户端命令：/usr/local/bin 下的符号链接
+  配置：/etc/slurm/slurm.conf、cgroup.conf、gres.conf
+  GPU 占用检查：/etc/slurm/gpu-idle-prolog.sh
+  服务：munge、slurmctld、slurmd，均开机自启
+  状态：/var/lib/slurm
+  日志：/var/log/slurm；完成记录：job-completion.log
+  源码、配置副本、构建与验证日志：/home/llmops/slurm-setup
+  没有部署 SlurmDBD/SQL 数据库；sacct 长期历史查询尚未启用。
+
+资源策略
+  research：默认科研分区，PriorityTier=100，最长 7 天。
+  llm：低优先分区，PriorityTier=10，可被科研作业抢占并重新排队。
+  llm 当前保持 DOWN，等待后续 vLLM 服务部署；仅 llmops 组可提交。
+  科研分区允许现有本机 Linux 用户经 MUNGE 认证提交作业。
+  整卡 GRES：gpu:rtx_5090:1；不启用 MPS、GPU 分片或挂起共享。
+  新作业可使用 28 个逻辑 CPU，另留 2 个物理核心给系统。
+  受调度主存共 40,000 MiB，主机其余约 7 GiB 留给系统。
+  llm 分区最多使用 8 个逻辑 CPU、28,000 MiB 主存。
+  cgroup v2 限制 CPU、主存、交换空间和 GPU 设备访问。
+  GPU 显存没有单独的 cgroup 容量配额；采用整卡作业互斥。
+  研究作业提交后，LLM 有 15 秒抢占宽限期，随后按 KillWait=15 秒清理。
+  调度周期和进程清理也会影响等待时间；不承诺严格的启动秒数。
+  被抢占作业默认约 120 秒后重新具备运行资格，还需等待 GPU 资源空闲。
+  vLLM 进程会从头重启、重新加载模型；被打断的 HTTP 请求不会恢复。
+
+GPU 保护边界
+  后续科研和模型 GPU 作业都须使用 sbatch、srun 或 salloc 提交。
+  此次没有改 SSH/PAM、迁移既有用户会话、重启主机或修改 NVIDIA 驱动。
+  桌面图形进程仍在 Slurm 调度之外运行。
+  未申请 GPU 的 Slurm 作业无法打开 /dev/nvidia0。
+  GPU 作业启动前检查现有 CUDA 计算进程；若发现占用或检查失败，则拒绝新作业。
+  Prolog 失败会使节点 DRAIN，作业可能被重新排队并挂起，需管理员排查。
+  该检查只覆盖启动时刻；不能阻止用户在 LLM 启动后绕过 Slurm 直接使用 GPU。
+  root/sudo 权限用户也能绕过设备隔离；此处不是对管理员的安全隔离。
+  保护策略依赖所有后续计算任务遵循 Slurm 提交规范。
+
+查看状态
+  sinfo -o '%P %a %l %D %G'
+  squeue
+  scontrol show node llmops
+  scontrol show job JOB_ID
+  systemctl status munge slurmctld slurmd --no-pager
+
+交互式科研任务
+  srun -p research --gres=gpu:rtx_5090:1 -c 8 --mem=24G -t 04:00:00 --pty bash -l
+  在获得的 shell 内激活现有 Python 环境并运行训练；完成后 exit 释放资源。
+
+批量科研任务
+  在训练目录、所需 Python 环境中执行：
+  sbatch /home/llmops/slurm-setup/examples/research-gpu.sbatch python train.py
+  也可传入解释器绝对路径；按任务需要修改 CPU、主存和时间限制。
+  取消自己的作业：scancel JOB_ID
+
+后续模型部署
+  vLLM 应作为 llm 分区中一个申请整张 GPU 的可重排队批量作业运行。
+  5–6 人共用同一个模型服务；不是为每个用户或请求启动一个模型副本。
+  4 个请求的并发策略留待 vLLM/API 部署时配置，本次尚未实现。
+  vLLM 的 max-num-seqs 与入口 HTTP 请求并发限制不是同一个设置，届时分别验证。
+  后续准备好启动脚本后，由管理员启用 llm：
+    sudo scontrol update PartitionName=llm State=UP
+  如果要重启后仍保持启用，需同步修改 /etc/slurm/slurm.conf 的分区 State 并 reconfigure。
+
+节点因 GPU 占用检查失败而 DRAIN 时
+  先检查 sinfo -R、nvidia-smi 和对应日志，确认现有计算任务已正常结束。
+  不要为了恢复调度而杀死其他人的进程。
+  确认 GPU 已空闲后：sudo scontrol update NodeName=llmops State=RESUME
+  如失败作业处于挂起状态，按实际情况取消或 sudo scontrol release JOB_ID。
+
+网络
+  控制器监听 127.0.1.1:6817。
+  节点服务使用 6818，服务级 cgroup IP 过滤只允许回环 IP 通信。
+  不改系统防火墙、主机名解析或 SSH；所有提交命令在本机 SSH 会话内使用。
+
+依赖与来源
+  仅新增 munge、libmunge2、libmunge-dev、libdbus-1-dev、pkg-config、libjson-c-dev。
+  安装时 0 个已有软件包升级；独立构建没有使用 GPU，编译并行数为 2、nice=15。
+  Slurm 源码：https://download.schedmd.com/slurm/slurm-26.05.5.tar.bz2
+  官方 MD5 记录匹配；另记录 SHA-256：
+    4680cafc82b0689865c885eb703441e7ebf764896c40fd03a50f2fcb60664f68
+  hwloc 源码：https://download.open-mpi.org/release/hwloc/v2.12/hwloc-2.12.2.tar.gz
+  官方 SHA-256 匹配：
+    ff7d309fdff7ceddfe15c1e79eaff25f3126a134f29f44d4e85571f187a6bab8
+  采用独立 hwloc，避免系统版本兼容问题及系统库升级。
+
+已完成的验证
+  PASS：无 GPU 分配的 Slurm 作业打开 /dev/nvidia0 被拒绝。
+  PASS：单核作业 CPU 亲和性约束为对应的两个硬件线程，256 MiB 主存限制生效。
+  PASS：申请 GPU 后成功建立 CUDA 上下文、分配并释放 1 MiB；不运行计算内核。
+  PASS：同一 GPU 的第二个低优先作业排队。
+  PASS：research 抢占 llm，llm 的 Restarts 递增并重新排队。
+  PASS：科研释放 GPU 后，llm 测试作业自动重启，启动标记为 restart=1。
+  PASS：占用检查拒绝新启动请求，已有测试 CUDA 进程保持运行并自行正常退出。
+  PASS：非回环地址无法连接节点守护服务。
+  PASS：科研批处理模板嵌套 srun 执行成功。
+  验证后所有测试作业已清理；research=UP，llm=DOWN，队列为空。
+  最后核验驱动仍为 580.119.02，GPU 计算进程列表为空，桌面显存约 561 MiB。
+  原有 local-shell-mcp-http、local-shell-mcp-cloudflared 服务仍为 active。
+  抢占证据：/home/llmops/slurm-setup/tests/preemption-result.json。
+  验证脚本首轮对恢复时间和日志追加方式的假设已修正；自动重启结果由
+  作业 Restarts=1、restart=1 启动标记、控制器事件顺序独立确认。

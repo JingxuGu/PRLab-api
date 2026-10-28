@@ -1,0 +1,30 @@
+[Unit]
+Description=Cloudflare Tunnel for api.example.org
+After=network-online.target new-api.service
+Wants=network-online.target new-api.service
+ConditionPathExists=/home/llmops/new-api/config/tunnel.token
+
+[Service]
+Type=simple
+User=llmops
+Group=llmops
+ExecStart=/usr/local/bin/cloudflared tunnel --no-autoupdate --protocol http2 --edge-ip-version 4 --metrics 127.0.0.1:20242 run --token-file /home/llmops/new-api/config/tunnel.token
+Restart=on-failure
+RestartSec=10
+CPUQuota=50%
+CPUWeight=10
+MemoryMax=256M
+Nice=10
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

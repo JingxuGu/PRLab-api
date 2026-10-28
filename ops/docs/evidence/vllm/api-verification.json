@@ -1,0 +1,64 @@
+{
+  "text": {
+    "passed": true,
+    "answer": "2",
+    "usage": {
+      "prompt_tokens": 22,
+      "total_tokens": 24,
+      "completion_tokens": 2,
+      "prompt_tokens_details": null
+    }
+  },
+  "vision": {
+    "passed": true,
+    "answer": "左边是红色，右边是蓝色。",
+    "usage": {
+      "prompt_tokens": 103,
+      "total_tokens": 112,
+      "completion_tokens": 9,
+      "prompt_tokens_details": null
+    }
+  },
+  "tool_calling": {
+    "passed": true,
+    "function": "get_temperature",
+    "arguments": {
+      "city": "南京"
+    }
+  },
+  "concurrency": {
+    "passed": true,
+    "maximum_active": 4,
+    "fifth_status": 429,
+    "four_request_seconds": 8.31,
+    "usage": [
+      {
+        "prompt_tokens": 1054,
+        "total_tokens": 1246,
+        "completion_tokens": 192,
+        "prompt_tokens_details": null
+      },
+      {
+        "prompt_tokens": 1054,
+        "total_tokens": 1246,
+        "completion_tokens": 192,
+        "prompt_tokens_details": null
+      },
+      {
+        "prompt_tokens": 1054,
+        "total_tokens": 1246,
+        "completion_tokens": 192,
+        "prompt_tokens_details": null
+      },
+      {
+        "prompt_tokens": 1054,
+        "total_tokens": 1238,
+        "completion_tokens": 184,
+        "prompt_tokens_details": null
+      }
+    ]
+  },
+  "streaming": {
+    "passed": true
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "users": [
+    {
+      "username": "example-admin",
+      "role": 100,
+      "status": 1,
+      "used_quota": 0,
+      "request_count": 0
+    },
+    {
+      "username": "user01",
+      "role": 1,
+      "status": 1,
+      "used_quota": 1739,
+      "request_count": 5
+    },
+    {
+      "username": "user02",
+      "role": 1,
+      "status": 1,
+      "used_quota": 1246,
+      "request_count": 1
+    },
+    {
+      "username": "user03",
+      "role": 1,
+      "status": 1,
+      "used_quota": 1225,
+      "request_count": 1
+    },
+    {
+      "username": "user04",
+      "role": 1,
+      "status": 1,
+      "used_quota": 1246,
+      "request_count": 1
+    },
+    {
+      "username": "user05",
+      "role": 1,
+      "status": 1,
+      "used_quota": 0,
+      "request_count": 0
+    },
+    {
+      "username": "user06",
+      "role": 1,
+      "status": 1,
+      "used_quota": 0,
+      "request_count": 0
+    }
+  ],
+  "channels": [
+    {
+      "name": "Qwen3.8 local Slurm",
+      "type": 1,
+      "status": 1,
+      "base_url": "http://127.0.0.1:8000",
+      "models": "qwen3.8-27b",
+      "auto_ban": 0
+    }
+  ],
+  "token_count": 6,
+  "usage_log_count": 8,
+  "options": [
+    {
+      "key": "AutomaticDisableChannelEnabled",
+      "value": "false"
+    },
+    {
+      "key": "LogConsumeEnabled",
+      "value": "true"
+    },
+    {
+      "key": "PasswordRegisterEnabled",
+      "value": "false"
+    },
+    {
+      "key": "RegisterEnabled",
+      "value": "false"
+    },
+    {
+      "key": "RetryTimes",
+      "value": "0"
+    },
+    {
+      "key": "ServerAddress",
+      "value": "http://localhost:13001"
+    }
+  ]
+}

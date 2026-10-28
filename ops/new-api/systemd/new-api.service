@@ -1,0 +1,41 @@
+[Unit]
+Description=New API local model platform
+After=network-online.target qwen38-gateway.service
+Wants=network-online.target qwen38-gateway.service
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=llmops
+Group=llmops
+WorkingDirectory=/home/llmops/new-api
+EnvironmentFile=/home/llmops/new-api/config/service.env
+ExecStart=/home/llmops/new-api/bin/new-api-v0.13.2 --port 3001 --log-dir /home/llmops/new-api/logs
+Restart=on-failure
+RestartSec=10
+UMask=0077
+CPUQuota=100%
+CPUWeight=10
+MemoryHigh=768M
+MemoryMax=1G
+TasksMax=128
+Nice=10
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/llmops/new-api/data /home/llmops/new-api/logs
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+IPAddressDeny=any
+IPAddressAllow=localhost
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

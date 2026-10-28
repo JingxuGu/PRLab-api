@@ -1,0 +1,24 @@
+[Unit]
+Description=Slurm workload manager node daemon
+Wants=network-online.target
+Requires=munge.service
+After=network-online.target munge.service
+
+[Service]
+Type=simple
+RuntimeDirectory=slurmd
+RuntimeDirectoryMode=0755
+ExecStart=/opt/slurm/26.05.5/sbin/slurmd -D -f /etc/slurm/slurm.conf
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=5
+Delegate=yes
+KillMode=process
+LimitNOFILE=65536
+LimitMEMLOCK=infinity
+TasksMax=infinity
+IPAddressDeny=any
+IPAddressAllow=localhost
+
+[Install]
+WantedBy=multi-user.target

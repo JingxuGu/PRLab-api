@@ -1,0 +1,120 @@
+llmops Qwen3.8 图文服务
+部署日期：2026-10-28，Asia/Shanghai
+
+连接与组件
+  SSH：ssh lab-server；部署账户 llmops。
+  工作目录：/home/llmops/llm
+  独立 Python：/home/llmops/llm/venv/bin/python
+  版本：Python 3.12.16，vLLM 0.26.0，PyTorch 2.11.0+cu130，Transformers 5.8.1。
+  FlashInfer：python/cubin 0.6.14，jit-cache 0.6.14+cu130。
+  精确依赖：/home/llmops/llm/config/requirements.lock.txt。
+  不改系统 Python、NVIDIA 驱动、既有 CUDA Toolkit 或科研环境。
+
+模型
+  Inferact/Qwen3.8-27B-NVFP4
+  固定提交：6128240ebaf4eaa7bad2b3d1c72c37d677c5f462
+  权重位置：/home/llmops/llm/models/Qwen3.8-27B-NVFP4
+  下载经过公开镜像，逐文件对照官方 Hugging Face API 清单进行校验：
+    大文件为 LFS SHA-256，普通文件为 Git blob SHA-1。
+  运行时离线加载本地文件，不启用 trust_remote_code。
+  模型带 MTP 权重文件，但本次未启用推测解码。
+
+接口与并发
+  入口：http://127.0.0.1:8000/v1
+  模型名称：qwen3.8-27b
+  后端：http://127.0.0.1:8001，另有独立密钥，客户端应使用入口。
+  /v1/chat/completions：文本、图片、工具调用和 SSE 流式输出。
+  /v1/completions：文本补全；/v1/models：模型列表。
+  六个客户端密钥位于 /home/llmops/llm/config/client-keys.json，权限 0600。
+  user01 到 user06 是分发标签，由管理员通过私下渠道分别分发。
+  后端密钥位于 /home/llmops/llm/config/backend-key，权限 0600。
+  密钥未写入部署说明、命令参数或聊天。
+  全局最多四个已接纳生成请求；第五个立即返回 HTTP 429，可稍后重试。
+  四人共用一个模型实例，vLLM max-num-seqs=4。
+  不接纳 n>1、best_of>1 或批量文本提示，避免一个请求展开为多路生成。
+  入口仅运行一个 worker；增加 worker 会破坏当前全局四请求计数。
+  请求体上限 8 MiB；上下文为 8,192 token，包含图片与输出预算。
+  每个请求最多一张图片，处理后最大约 1,048,576 像素；视频未启用。
+  关闭 CUDA Graph（enforce-eager），避免单张 5090 启动图捕获的显存峰值。
+  KV 缓存初始保留模型原生精度；GPU 内存预算为 90%，实际以启动和并发验证为准。
+  推理日志不记录请求正文；入口访问日志关闭。
+
+从个人电脑访问
+  保持以下终端窗口打开：
+    ssh -N -o ExitOnForwardFailure=yes -L 127.0.0.1:18000:127.0.0.1:8000 lab-server
+  客户端填写：
+    Base URL：http://127.0.0.1:18000/v1
+    Model：qwen3.8-27b
+    API Key：管理员私下分发的对应用户密钥。
+  5–6 人可以各自在自己的电脑建立 SSH 隧道；服务器不会直接暴露推理端口。
+
+Python 客户端示例（在有 openai 包的客户端环境中运行）
+  from getpass import getpass
+  from openai import OpenAI
+  client = OpenAI(base_url="http://127.0.0.1:18000/v1", api_key=getpass("API Key: "))
+  r = client.chat.completions.create(
+      model="qwen3.8-27b",
+      messages=[{"role":"user","content":"请简短介绍你自己。"}],
+      max_tokens=512,
+      extra_body={"chat_template_kwargs":{"enable_thinking":False}},
+  )
+  print(r.choices[0].message.content)
+  图片使用 OpenAI 格式 content 数组中的 image_url，支持客户端将图片编码为 data URL。
+  工具调用只返回工具选择与参数，服务器不会执行客户端工具。
+
+调度与科研保护
+  模型作为 llm 分区的一个完整 GPU 作业运行，作业名 qwen38-vllm。
+  请求 8 个逻辑 CPU、28,000 MiB 主存、1 张 RTX 5090，最长 24 小时。
+  research 优先级高于 llm，可终止并重新排队模型作业，释放显存。
+  不采用暂停进程后保留显存的共享方式。
+  被抢占时当前请求可能中断；入口在后端停止或启动期间返回 HTTP 503。
+  被重新排队的作业默认约 120 秒后才具备调度资格，再等待资源和模型重新加载。
+  120 秒不是服务恢复总时长，也不是科研作业启动时延承诺。
+  稳定入口不申请 GPU；模型被抢占时它继续运行，提供就绪状态。
+  模型作业正常到期后，管理服务会延迟 120 秒再提交一个新作业。
+  异常重复启动三次/30 分钟后管理服务停止重试，需要管理员排查。
+  后续所有 GPU 计算任务仍须通过 Slurm 提交。调度外的新任务和 root 可以绕过隔离。
+  桌面图形进程保留，不受本次服务管理。
+
+管理命令（在服务器上）
+  sinfo
+  squeue
+  systemctl status qwen38-gateway qwen38-slurm --no-pager
+  curl http://127.0.0.1:8000/health
+  /livez 表示入口进程存活；/health 为模型就绪状态，未就绪返回 503。
+  当前模型作业编号：/home/llmops/llm/state/job-id。
+  模型日志：/home/llmops/llm/logs/vllm-JOB_ID.log。
+  管理日志：sudo journalctl -u qwen38-slurm -u qwen38-gateway -n 80 --no-pager。
+  停止并释放模型 GPU：sudo systemctl stop qwen38-slurm。
+  再启用：sudo systemctl start qwen38-slurm。
+  暂停自动模型服务请停止该管理服务；单独 scancel 会被它重新提交。
+  更换客户端密钥后重启入口：sudo systemctl restart qwen38-gateway。
+  模型作业配置：/home/llmops/llm/config/qwen38-vllm.sbatch。
+  修改模型参数后停止、再启动管理服务；仅重新排队会从头加载模型。
+
+科研任务提交
+  srun -p research --gres=gpu:rtx_5090:1 -c 8 --mem=24G -t 04:00:00 --pty bash -l
+  或在训练目录和所需环境中：
+  sbatch /home/llmops/slurm-setup/examples/research-gpu.sbatch python train.py
+
+验证记录
+  /home/llmops/llm/config/model-verified.json：下载来源、固定版本、文件校验完成标记。
+  /home/llmops/llm/config/api-verification.json：真实文本、图片、并发和流式输出结果。
+  /home/llmops/llm/config/preemption-verification.json：真实模型抢占和恢复结果。
+  Slurm 基础隔离验证记录仍在 /home/llmops/slurm-setup/tests/。
+
+本次验收结果
+  PASS：所有下载文件对照官方清单校验通过，模型采用原生 NVFP4 CUTLASS CUDA 内核。
+  PASS：真实文本问答、红蓝形状图片识别、结构化工具调用和 SSE 流式输出。
+  PASS：四个不同客户端密钥同时提交四张 1024×1024 图片，四路全部成功。
+        第五个密钥的并发请求返回 429，完成后入口计数恢复为 0。
+        本次四路生成测试约 8.31 秒；属于合成验收任务，不代表所有请求的性能。
+  PASS：真实模型作业 16 被科研测试作业 17 抢占，科研 CUDA 分配成功。
+        本次约 18.04 秒获得 GPU，模型释放后显存为 561 MiB。
+        模型 Restarts=1，自动重载后接口恢复，完整测试约 206.51 秒。
+        上述是本次观测结果，不是固定等待时间或服务时延保证。
+  PASS：Mac 通过本机 18000 端口 SSH 隧道访问恢复后的 /health。
+  测试科研作业已结束；最终保留模型作业和入口服务，研究队列继续优先。
+  稳态显存观测约 30,445–30,859 MiB（29.7–30.1 GiB，含桌面图形占用）。
+  运行参数关闭 CUDA Graph，保留 BF16 KV 缓存，不启用推测解码。
+  首次请求会发生部分 Triton 内核 JIT 预热，缓存保存在独立部署目录。

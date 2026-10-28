@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+umask 077
+python3 - <<'PY'
+from getpass import getpass
+from pathlib import Path
+import base64,json,os,re
+os.umask(0o077)
+p=Path('/home/llmops/new-api/config/tunnel.token')
+if p.exists():
+ raise SystemExit('Token file already exists. Retained unchanged; inspect the existing tunnel before replacing it.')
+token=getpass('Paste ONLY the new prlab-api tunnel token (input hidden): ').strip()
+if not re.fullmatch(r'[A-Za-z0-9_+/=-]+',token):
+ raise SystemExit('Invalid token characters. No file written.')
+try:
+ payload=json.loads(base64.b64decode(token+'='*((-len(token))%4),altchars=b'-_'))
+ assert isinstance(payload,dict) and all(k in payload for k in ('a','t','s'))
+except Exception:
+ raise SystemExit('Invalid tunnel token format. No file written.')
+p.write_text(token+'\n')
+os.chmod(p,0o600)
+print('Token saved privately. No token printed.')
+PY
+sudo systemctl enable --now new-api-cloudflared
+systemctl is-active new-api-cloudflared

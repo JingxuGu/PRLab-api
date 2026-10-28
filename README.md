@@ -1,3 +1,5 @@
+> PRLab operations: [maintenance index](PRLAB.md) · [runbooks and scripts](ops/README.md).
+
 <div align="center">
 
 ![new-api](/web/public/logo.png)

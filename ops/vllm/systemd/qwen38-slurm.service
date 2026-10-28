@@ -1,0 +1,22 @@
+[Unit]
+Description=Qwen3.8 low-priority Slurm job submitter
+Requires=slurmctld.service slurmd.service
+After=slurmctld.service slurmd.service
+StartLimitIntervalSec=1800
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=llmops
+Group=llmops
+WorkingDirectory=/home/llmops/llm
+ExecStart=/home/llmops/llm/venv/bin/python /home/llmops/llm/bin/submit-service.py
+Restart=always
+RestartSec=120
+TimeoutStopSec=30
+KillMode=mixed
+MemoryMax=256M
+CPUQuota=50%
+
+[Install]
+WantedBy=multi-user.target

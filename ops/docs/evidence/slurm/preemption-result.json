@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "low_job": 7,
+  "queued_job": 8,
+  "research_job": 9,
+  "llm_restarts": 1,
+  "events": [
+    "[2026-10-27T23:14:17.001] preempted JobId=7 has been requeued to reclaim resources for JobId=Invalid",
+    "[2026-10-27T23:14:18.673] Requeuing JobId=7",
+    "[2026-10-27T23:14:18.673] sched: Allocate JobId=9 NodeList=llmops #CPUs=2 Partition=research",
+    "[2026-10-27T23:16:47.001] sched: Allocate JobId=7 NodeList=llmops #CPUs=2 Partition=llm"
+  ],
+  "validation_note": "Initial live assertion assumed appended batch output. The restarted output was overwritten by Slurm default. Recovery verified independently using restart marker, job Restarts counter, and chronological controller allocation records. The reusable verifier now requests appended output and checks the restart marker."
+}

@@ -1,0 +1,21 @@
+[Unit]
+Description=Slurm workload manager controller
+Wants=network-online.target
+Requires=munge.service
+After=network-online.target munge.service
+
+[Service]
+Type=simple
+User=slurm
+Group=slurm
+RuntimeDirectory=slurmctld
+RuntimeDirectoryMode=0755
+ExecStart=/opt/slurm/26.05.5/sbin/slurmctld -D -f /etc/slurm/slurm.conf
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=65536
+TasksMax=512
+
+[Install]
+WantedBy=multi-user.target

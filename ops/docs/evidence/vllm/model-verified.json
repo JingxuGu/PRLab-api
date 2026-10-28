@@ -1,0 +1,9 @@
+{
+  "repo": "Inferact/Qwen3.8-27B-NVFP4",
+  "revision": "6128240ebaf4eaa7bad2b3d1c72c37d677c5f462",
+  "download_endpoint": "https://hf-mirror.com",
+  "integrity": "All downloaded files match the LFS SHA-256 or Git blob SHA-1 from the primary Hugging Face API manifest.",
+  "excluded": [
+    ".gitattributes"
+  ]
+}

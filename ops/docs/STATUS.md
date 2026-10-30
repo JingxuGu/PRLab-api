@@ -1,8 +1,9 @@
-# 维护快照：2026-10-28（北京时间）
+# 维护快照：2026-10-31（北京时间）
 
 当前核对：`new-api`、`new-api-cloudflared`、`qwen38-gateway`、`qwen38-slurm` 均 active。
-Cloudflare 隧道已由管理员输入 token 并启动；本次从服务器检查公网地址未成功，域名和公网链路尚待端到端验收。
-不要将“隧道进程 active”视为“api.example.org 已可用”。
+邀请审批版已上线，Mailjet 测试与真实申请通知均已收件确认。
+公网注册页、新版本状态、令牌保护和既有账号最小推理已验证；详见 [上线记录](prlab-customization.md)。
+域名与主机信息在公开仓库中使用示例值。
 
 | 项目 | 固定版本或配置 |
 | --- | --- |
@@ -16,7 +17,7 @@ Cloudflare 隧道已由管理员输入 token 并启动；本次从服务器检�
 | FlashInfer | 0.6.14，cubin 与 cu130 JIT cache 配套 |
 | 模型 | Inferact/Qwen3.8-27B-NVFP4 |
 | 模型提交 | 6128240ebaf4eaa7bad2b3d1c72c37d677c5f462 |
-| New API | v0.13.2，官方发行文件 SHA256 已核对 |
+| New API | v0.13.2-prlab.3，源码和程序校验值见上线记录 |
 | API 模型名 | qwen3.8-27b |
 | 上下文 / 多模态 | 8192 token，1 张图片，约 1MP；不启用视频 |
 | 并发 | 网关全局最多 4 个请求，第 5 个 429 |
@@ -27,7 +28,7 @@ Cloudflare 隧道已由管理员输入 token 并启动；本次从服务器检�
 - cgroup GPU、CPU、内存隔离及启动前 GPU 占用检查。
 - vLLM 原生 NVFP4 内核、文本、图片、工具调用及 SSE。
 - 真实模型被科研测试作业抢占、释放显存、重新排队并自动恢复。
-- New API 6 个独立普通用户、6 个模型受限令牌，公开注册关闭。
+- New API 原有 6 个独立普通用户与模型受限令牌保留；申请入口仅接受有效邀请，批准后才能登录。
 - 通过 New API 同时进行四路图文生成；第五个用户请求 429。
 - New API 按用户记录成功请求用量。
 - New API 的非回环访问由 systemd cgroup IP 规则阻止。

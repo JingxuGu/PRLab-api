@@ -1,0 +1,40 @@
+{
+  "checked_date": "2026-10-31",
+  "timezone": "Asia/Shanghai",
+  "version": "v0.13.2-prlab.3",
+  "source_commit": "5f823c225d68f030a793ecc0cfcde9780b6979b9",
+  "merge_commit": "047d5119ea93fac2dc8f7d1772e09a0c6d93dbf2",
+  "binary_sha256": "954c62602c4c5908c2aa392efed1e37c4473252f765ea484fdfe18058ca33949",
+  "database": "SQLite",
+  "candidate_validation": "private copy of existing live database",
+  "checks": {
+    "invitation_email_binding": true,
+    "missing_used_revoked_expired_invitation_denied": true,
+    "pending_and_rejected_login_denied": true,
+    "approved_ordinary_login_and_restricted_token_creation": true,
+    "ordinary_user_approval_access_denied": true,
+    "duplicate_approval_denied": true,
+    "pending_hash_removed_after_review": true,
+    "smtp_notification_accepted": true,
+    "notification_delivery_confirmed_by_owner": true,
+    "second_start_migration_and_existing_credentials_preserved": true,
+    "database_integrity": true,
+    "public_registration_page_http": 200,
+    "public_models_without_token_http": 401,
+    "existing_token_models_and_minimal_inference": true,
+    "gateway_ready": true,
+    "gateway_max_requests": 4,
+    "original_model_job_kept_running": true
+  },
+  "production_test_accounts_created": 0,
+  "production_registration_requests_created_by_acceptance": 0,
+  "registration_mode": "single-use email-bound invitation and root approval",
+  "sender_display_name": "",
+  "backup": "database, private configuration and service unit retained privately before rollout",
+  "notes": [
+    "No real account passwords, API tokens, email addresses, host identifiers or private paths are included.",
+    "Full creation and review tests ran only on the copied database. Production checks used read-only data access and one existing-account inference.",
+    "Some default automated User-Agent strings receive existing Cloudflare 403/1010 responses; normal browser/application identifiers were verified.",
+    "No live MySQL or PostgreSQL instance tests were run."
+  ]
+}

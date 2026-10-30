@@ -6,7 +6,7 @@ Slurm + cgroup v2 + RTX 5090 + vLLM + Qwen3.8-27B NVFP4 + New API。
 ## 架构
 
 ```text
-客户端 → api.example.org（Cloudflare Tunnel，域名待验收）
+客户端 → api.example.org（Cloudflare Tunnel，公网链路已验证）
        → New API :3001（账号、令牌、用量）
        → 并发网关 127.0.0.1:8000（全局 4 请求）
        → vLLM 127.0.0.1:8001（Slurm llm 分区，1 张完整 GPU）
@@ -16,7 +16,7 @@ Slurm research 分区：高优先级，可抢占并重新排队 llm 作业。
 
 公开示例：SSH 别名 `lab-server`，部署用户及节点名 `llmops`，主目录 `/home/llmops`，域名 `api.example.org`。
 这些值均已替换真实部署信息；使用前须按照[迁移说明](MIGRATION.md)适配。
-维护快照：2026-10-28（Asia/Shanghai）。本仓库只保存维护源码、非密配置、说明和脱敏验收结果。
+维护快照：2026-10-31（Asia/Shanghai）。本仓库只保存维护源码、非密配置、说明和脱敏验收结果。
 
 ## 文档入口
 

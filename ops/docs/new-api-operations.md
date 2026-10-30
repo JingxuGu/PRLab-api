@@ -163,11 +163,12 @@ Mailjet 凭据不进入 Git、聊天、命令参数或 shell 历史。真实发�
    实际值仅在服务器填写，`admin_username` 必须是现有超级管理员：
 
    ```json
-   {"from":"noreply@example.org","from_name":"example.org","recipient":"owner@example.org","admin_username":"example-admin"}
+   {"from":"noreply@example.org","from_name":"","recipient":"owner@example.org","admin_username":"example-admin"}
    ```
 
-   `from_name` 是通用发件人显示名，默认取发件邮箱的域名，可供不同应用共用。
+   `from_name` 是可选发件人显示名，留空或不填写时只显示发件邮箱，不自动补上域名或平台名。
    新版服务在私密 `service.env` 中使用 `SMTP_FROM_NAME` 指定此名称，与平台名称独立；
+   显式设置 `SMTP_FROM_NAME=` 表示不使用显示名，完全未设置该变量时保留上游平台名默认行为；
    邀请审批通知还需设置 `PRLAB_APPROVAL_EMAIL` 为同一收件邮箱。
    修改前保留该文件的受限备份；此环境变量需要平台重启后才被读取。
 3. 运行网络配置工具（需要部署账户已有的 sudo 权限）：

@@ -102,7 +102,7 @@ def main():
             if not 16 <= len(value) <= 512 or any(c.isspace() for c in value) or not value.isascii():
                 raise ValueError('Invalid credential format')
         message = EmailMessage()
-        from_name = settings.get('from_name') or settings['from'].split('@')[1]
+        from_name = settings.get('from_name', '').strip()
         message['From'] = formataddr((from_name, settings['from']))
         message['To'] = settings['recipient']
         message['Subject'] = 'Mailjet SMTP connection test'

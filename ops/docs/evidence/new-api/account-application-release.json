@@ -1,0 +1,43 @@
+{
+  "checked_date": "2026-10-31",
+  "timezone": "Asia/Shanghai",
+  "version": "v0.13.2-prlab.4",
+  "source_commit": "9b9ab547d07f0cc910f6d45188f6aaa77db3c2c8",
+  "merge_commit": "f1252de489d0deb2bbeff1430487473de710e271",
+  "binary_sha256": "31ae18ca4f3930ce7651d76b32b5f1897c64c06374b606bc08b0e5b47f2490fb",
+  "mode": "email application -> root review -> applicant credential email",
+  "database": "SQLite",
+  "acceptance_scope": "private live-database copy and verified loopback TLS SMTP fixture",
+  "checks": {
+    "email_only_submission": true,
+    "no_invitation_username_or_password_required": true,
+    "normalized_duplicate_email_not_notified_again": true,
+    "owner_notification_separate_from_applicant_credentials": true,
+    "pending_no_user_or_password": true,
+    "approval_ordinary_account_and_quota": true,
+    "initial_password_only_in_applicant_mail": true,
+    "initial_password_not_in_api_response": true,
+    "initial_password_login": true,
+    "personal_password_change_and_old_password_invalidated": true,
+    "duplicate_review_rejected": true,
+    "rejection_no_account": true,
+    "failed_credential_delivery_retry": true,
+    "retry_after_first_login_denied": true,
+    "existing_users_tokens_channels_preserved": true,
+    "mailjet_marked_test_templates_accepted": true,
+    "public_policy_and_application_page": true,
+    "existing_token_model_list_and_minimal_inference": true,
+    "gateway_ready": true,
+    "gateway_max_requests": 4,
+    "original_gpu_job_not_restarted": true
+  },
+  "production_test_accounts_created": 0,
+  "initial_production_users": 7,
+  "test_mail_bodies_and_tls_key_cleaned": true,
+  "backup": "database/private configuration/unit backed up before rollout",
+  "notes": [
+    "Plaintext initial passwords are transient for delivery; only bcrypt hashes persist.",
+    "No addresses, passwords, tokens, internal host identifiers or actual deployment paths are included.",
+    "MySQL/PostgreSQL instances were not provisioned."
+  ]
+}

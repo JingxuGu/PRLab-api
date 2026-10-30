@@ -22,7 +22,7 @@ Slurm research 分区：高优先级，可抢占并重新排队 llm 作业。
 
 - [迁移范围、示例替换与来源校验](MIGRATION.md)
 - [当前状态与版本](docs/STATUS.md)
-- [PRLab 邀请注册与审批部署](docs/prlab-customization.md)
+- [PRLab 邮箱申请与账号发放](docs/prlab-customization.md)
 - [Slurm 调度和科研提交](docs/slurm-operations.txt)
 - [vLLM、图文推理与并发网关](docs/vllm-operations.txt)
 - [New API、账号管理与域名接入](docs/new-api-operations.md)

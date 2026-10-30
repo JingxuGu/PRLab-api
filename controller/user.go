@@ -136,7 +136,7 @@ func Logout(c *gin.Context) {
 
 func Register(c *gin.Context) {
 	if common.InvitationRegistrationEnabled() {
-		RegisterWithInvitation(c)
+		RegisterAccountApplication(c)
 		return
 	}
 	if !common.RegisterEnabled {

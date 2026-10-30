@@ -6,7 +6,6 @@ import (
 	"net/http/httptest"
 	"strconv"
 	"testing"
-	"time"
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/i18n"
@@ -35,7 +34,7 @@ func TestRegistrationRoutesRequireRootAndPreservePendingState(t *testing.T) {
 	common.RedisEnabled = false
 	common.BatchUpdateEnabled = false
 	common.UsingSQLite = true
-	require.NoError(t, db.AutoMigrate(&model.User{}, &model.Log{}, &model.RegistrationInvitation{}, &model.RegistrationRequest{}))
+	require.NoError(t, db.AutoMigrate(&model.User{}, &model.Log{}, &model.AccountApplication{}))
 	oldRegister, oldPassword, oldVerification := common.RegisterEnabled, common.PasswordRegisterEnabled, common.EmailVerificationEnabled
 	common.RegisterEnabled = true
 	common.PasswordRegisterEnabled = true
@@ -71,33 +70,42 @@ func TestRegistrationRoutesRequireRootAndPreservePendingState(t *testing.T) {
 		return w
 	}
 	for _, role := range []int{0, common.RoleCommonUser, common.RoleAdminUser} {
-		for _, path := range []string{"/api/registration/invitations", "/api/registration/requests/1/review", "/api/registration/requests/1/notify", "/api/registration/invitations/1/revoke"} {
+		for _, path := range []string{"/api/registration/requests/1/review", "/api/registration/requests/1/notify", "/api/registration/requests/1/credentials"} {
 			w := call(http.MethodPost, path, map[string]interface{}{"action": "approve"}, role)
 			require.NotContains(t, w.Body.String(), `"success":true`)
 		}
 		w := call(http.MethodGet, "/api/registration/", nil, role)
 		require.NotContains(t, w.Body.String(), `"success":true`)
 	}
-	w := call(http.MethodPost, "/api/user/register", map[string]string{"username": "applicant", "email": "invited@example.org", "password": "SafePassword123"}, 0)
+
+	w := call(http.MethodPost, "/api/user/register", map[string]string{"email": "not-an-email"}, 0)
 	require.Equal(t, 400, w.Code)
-	_, code, err := model.CreateRegistrationInvitation("invited@example.org", 1, 100, time.Now().Add(time.Hour).Unix())
-	require.NoError(t, err)
-	w = call(http.MethodPost, "/api/user/register", map[string]interface{}{"username": "applicant", "email": "invited@example.org", "password": "SafePassword123", "invite_code": code, "role": 100, "status": 1}, 0)
+	w = call(http.MethodPost, "/api/user/register", map[string]any{"email": "APPLICANT@example.org", "username": "chosen", "password": "DoNotUseThis123", "role": 100}, 0)
 	require.Equal(t, 202, w.Code)
 	require.Contains(t, w.Body.String(), `"status":"pending"`)
 	var count int64
-	db.Model(&model.User{}).Count(&count)
+	require.NoError(t, db.Model(&model.User{}).Count(&count).Error)
 	require.Zero(t, count)
+	var application model.AccountApplication
+	require.NoError(t, db.First(&application).Error)
+	require.Equal(t, "applicant@example.org", application.Email)
+	require.Empty(t, application.Username)
+	w = call(http.MethodPost, "/api/user/register", map[string]string{"email": "applicant@example.org"}, 0)
+	require.Equal(t, 202, w.Code)
+	require.NoError(t, db.Model(&model.AccountApplication{}).Count(&count).Error)
+	require.EqualValues(t, 1, count)
 	w = call(http.MethodGet, "/api/registration/", nil, common.RoleRootUser)
 	require.Equal(t, 200, w.Code)
+	require.NotContains(t, w.Body.String(), "DoNotUseThis123")
 	require.NotContains(t, w.Body.String(), "password_hash")
-	require.NotContains(t, w.Body.String(), "token_hash")
-	require.NotContains(t, w.Body.String(), code)
-	w = call(http.MethodPost, "/api/registration/requests/1/review", map[string]string{"action": "approve"}, common.RoleRootUser)
+	require.NotContains(t, w.Body.String(), "invitations")
+	// Approval must not create an account without a configured mail-delivery path.
+	w = call(http.MethodPost, "/api/registration/requests/1/review", map[string]any{"action": "approve"}, common.RoleRootUser)
+	require.Equal(t, 409, w.Code)
+	require.NoError(t, db.Model(&model.User{}).Count(&count).Error)
+	require.Zero(t, count)
+	w = call(http.MethodPost, "/api/registration/requests/1/review", map[string]string{"action": "reject"}, common.RoleRootUser)
 	require.Equal(t, 200, w.Code)
-	var user model.User
-	require.NoError(t, db.First(&user).Error)
-	require.Equal(t, common.RoleCommonUser, user.Role)
-	w = call(http.MethodPost, "/api/registration/requests/1/review", map[string]string{"action": "approve"}, common.RoleRootUser)
+	w = call(http.MethodPost, "/api/registration/requests/1/review", map[string]string{"action": "reject"}, common.RoleRootUser)
 	require.Equal(t, 409, w.Code)
 }

@@ -1,94 +1,80 @@
-# PRLab invitation registration and approval
+# Email account applications and administrator approval
 
-This deployment branch is based on upstream New API v0.13.2. Upstream main, licenses,
-credits, and branding remain intact. The site's configurable display name remains PRLab api.
+This maintenance branch is based on New API v0.13.2. It implements an application flow,
+replacing the previous invitation-only design. Upstream attribution and existing accounts remain intact.
 
-## Flow
+1. A visitor opens `/register` and submits only an email address. No invitation, username or password is required.
+2. A pending `AccountApplication` reserves that normalized email. No user or password exists yet.
+3. The private administrator mailbox receives a review notification linking to `/console/user`.
+4. A root administrator approves or rejects the application. GET requests never approve accounts.
+5. Approval atomically creates an ordinary user with a randomly generated username, a 16-character
+   cryptographically random initial password, and the quota selected in the console.
+6. The username and initial password are emailed to the application address. The password is stored
+   only as bcrypt; plaintext exists transiently for that mail attempt and is never returned by an API.
+7. The applicant can log in and change the initial password in personal settings.
 
-1. A root administrator opens **User management → Invitations and registration approval**.
-2. Create a single-use invitation for a specific email address (1–30 days; default 7).
-   Select the initial account quota. The random invitation code is displayed once.
-3. Privately send the generated registration link. Its code is in the URL fragment so
-   it is not included in ordinary HTTP access logs or Referer headers.
-4. The applicant submits a username, the bound email, and an 8–20 character password.
-5. The request remains **pending**. No login-capable User or API token is created.
-6. The root administrator approves or rejects it in User management. Approval atomically
-   creates an enabled ordinary account. The applicant can then sign in and create tokens.
+Rejection creates no account and releases the pending email reservation. Duplicate pending or
+existing-account email submissions receive the same public acknowledgement and do not send duplicate
+notifications. Existing OAuth and WeChat bindings may log in; automatic new-account creation cannot
+bypass administrator approval.
 
-The pending password is stored only as a bcrypt hash, never returned by the API or emailed.
-Approval and rejection erase that hash from the request record. Rejected applicants need
-an entirely new invitation; old invitations remain consumed.
-
-Email notification is optional while SMTP is unavailable. Pending applications remain
-visible in the console, with `unconfigured`/`failed` notification status. Once SMTP is
-configured, root can resend the notification. An email links to the authenticated console;
-opening a link or a mail scanner GET request never approves an account.
-
-## Configuration
-
-Keep private environment values on the server, outside Git:
+## Private runtime settings
 
 ```dotenv
-INVITATION_REGISTRATION_ENABLED=true
+APPROVAL_REGISTRATION_ENABLED=true
 PRLAB_APPROVAL_EMAIL=administrator@example.org
-SMTP_FROM_NAME=example.org
+SMTP_FROM_NAME=
 ```
 
-The PRLab branch enables the invitation policy by default; explicitly set the variable above in production as well.
-Setting it to false restores the upstream flow and should only be done by a trusted operator.
+Keep real addresses and SMTP credentials on the server, outside Git. An explicitly empty sender
+name shows only the email address. The platform's display name is separate.
+The previous `INVITATION_REGISTRATION_ENABLED` variable is retained only as an operator-policy fallback
+for safe upgrades; it no longer requires an invitation. The public status flag is now
+`approval_registration_enabled`; `invitation_registration_enabled` is false.
 
-Enable New API's master registration and password registration switches. The invitation
-policy then replaces public password registration; these switches can still close all
-new applications. Existing accounts and administrator-created users remain unchanged.
-New OAuth/WeChat account creation is blocked while the invitation policy is active;
-existing bound accounts can continue to sign in.
+The master registration and password-registration switches must be enabled to accept applications.
+Turning them off closes new applications. Existing accounts are unaffected.
+Set the server address to the real HTTPS origin so email login and review links are correct.
+SMTP requires certificate-verified TLS; body/credential details are never logged by this flow.
 
-The real approval recipient belongs in the private environment file, not source code.
-`SMTP_FROM_NAME` controls the sender display name for system mail and approval notices,
-independently of the platform name. Use a general domain identity when sharing this sender
-with other applications. If unset, the existing platform-name behavior is preserved.
-Set `SMTP_FROM_NAME=` explicitly to omit the display name and show only the sender address.
-Configure SMTP via the existing root settings page, and set the platform server address
-to its actual HTTPS public origin. Notifications require verified implicit TLS or STARTTLS;
-plaintext SMTP and invalid server certificates are rejected, and delivery has a 15s deadline.
-No SMTP server, password, or live mail recipient is embedded in this fork.
+## Delivery failures
 
-Operators must configure SMTP egress according to their own network policy. Preserve
-existing inbound isolation when permitting a mail provider. SMTP setup is separate
-from the invitation and approval workflow.
+The console reports administrator-notification and applicant-credential delivery separately.
+Approval is unavailable until SMTP and the private administrator recipient are configured.
+If credential delivery fails, the approved user remains linked to the application and the root
+administrator can retry before the first successful login. Retry generates a new initial password,
+updates its bcrypt hash, and sends the new credentials. It never exposes that password in an API.
+A sent credential email cannot be resent through this action. A stale interrupted send becomes
+retryable after two minutes. Once the user has logged in, retry cannot reset their password;
+use the normal authenticated password change or password-recovery flow instead.
+No plaintext password outbox is persisted.
 
 ## API
 
-Root-authenticated endpoints (session plus New-Api-User, or management access token):
+Public: `POST /api/user/register` with `{ "email": "applicant@example.org" }` returns HTTP 202.
+Existing Turnstile and request-rate controls remain applied. Public responses do not reveal whether
+an email is already registered or awaiting review.
 
-- `GET /api/registration/?status=pending|approved|rejected`: latest 100 requests and invitations.
-- `POST /api/registration/invitations`: `{email, valid_days, initial_quota}`; returns code once.
-- `POST /api/registration/invitations/:id/revoke`: only unconsumed invitations.
-- `POST /api/registration/requests/:id/review`: `{action: "approve" | "reject"}`.
-- `POST /api/registration/requests/:id/notify`: retry SMTP notification for a pending request.
+Root-only endpoints:
 
-Public submission stays at `POST /api/user/register`, with `invite_code`, `username`,
-`email`, and `password`; existing email verification and Turnstile checks apply if enabled.
-A successful application returns HTTP 202 and `data.status=pending`, not an authenticated
-session. Root endpoints return no invitation digest or password hash. Mutations require POST.
+- `GET /api/registration/?status=pending|approved|rejected`
+- `POST /api/registration/requests/:id/review` with `action` and optional `initial_quota`
+- `POST /api/registration/requests/:id/notify` to retry an administrator notification
+- `POST /api/registration/requests/:id/credentials` to retry failed initial credential delivery
 
-## Database and rollout
+The former invitation-creation/revocation routes and invitation screens have been removed.
+Old invitation tables are retained for migration compatibility, but are not used by this flow.
+The new `account_applications` table is an additive GORM migration, using a nullable unique pending-email
+reservation and transactional conditional review/delivery transitions.
 
-Two additive GORM migrations: RegistrationInvitation and RegistrationRequest. No existing
-user, token, model channel, quota, Slurm, CUDA, or GPU service schema/configuration is changed.
-All queries use GORM and portable expressions for SQLite, MySQL, and PostgreSQL.
-Invitation consumption and request review use conditional writes inside transactions.
-Unique pending username/email indexes prevent simultaneous duplicate applications. Terminal
-requests release these reservations, allowing rejection followed by a new invitation.
+## Validation and rollout
 
-Before rollout: back up the live SQLite database and private configuration, build the web
-assets and Go binary, test against a copy of the database, and stage the binary separately.
-Use an isolated build environment.
-Enable the policy in the new binary's environment before opening the registration switch.
-If rolling back to an upstream binary, first close registration again; the older binary does
-not understand the invitation policy. Keep the additive tables or restore the matching backup.
-
-Tests cover invitation expiry/revocation/email binding, concurrent consumption, pending
-login denial, repeat approval, rollback on account conflict, rejection/re-invitation, root
-access control, overposting role/status fields, missing SMTP, and notification retry.
-No test sends live email or uses the GPU.
+Run existing and new model/controller/router/service regression tests, the frozen-lockfile frontend
+build, and full Go build. Test the candidate against a copy of the current database and a loopback
+TLS SMTP fixture: email-only application, pending login denial, approval mail parsing, ordinary login,
+password change, duplicate review, rejection, delivery failure/retry, and denial of password reset after
+first login. No test account or initial test credential should be created in production.
+Back up the live database, private configuration and unit before switching. Verify the new public
+policy and console before accepting applications; retain resource/device/network restrictions.
+After new applications arrive, do not roll back by overwriting the database with an older backup.
+Old invitation binaries do not implement the new application table; close registration before any rollback.

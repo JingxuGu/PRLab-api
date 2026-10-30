@@ -3827,6 +3827,27 @@
     "待发送": "Pending delivery",
     "未配置": "Not configured",
     "发送失败": "Delivery failed",
-    "已发送": "Sent"
+    "已发送": "Sent",
+    "不适用": "Not applicable",
+    "仅在用户首次登录前重试。重试会生成新的初始密码，已登录用户请使用找回密码。": "Retry only before the first login. Retrying generates a new initial password; users who have signed in should use password recovery.",
+    "初始额度": "Initial quota",
+    "发送中": "Sending",
+    "填写邮箱即可申请账号。管理员审核通过后，系统会通过邮件发放账号和初始密码。": "Apply with your email. After administrator approval, your username and initial password will be sent by email.",
+    "审核通过后，账号和初始密码会发送到申请邮箱。登录后可在个人设置中修改密码。": "After approval, your username and initial password will be emailed to you. You can change the password in personal settings after signing in.",
+    "批准并发送账号": "Approve and send account",
+    "提交账号申请": "Submit account application",
+    "用户填写邮箱后在此等待审核。批准会创建普通账号，并将账号和初始密码发送到申请邮箱。": "Email applications await review here. Approval creates an ordinary account and emails its username and initial password to the applicant.",
+    "申请已收到，等待管理员审核": "Application received; awaiting administrator review",
+    "申请账号": "Apply for an account",
+    "申请邮箱": "Application email",
+    "确认批准并发送": "Confirm approval and send",
+    "管理员通知": "Administrator notification",
+    "请先配置邮件服务，审核通过后需要向申请人发送账号和初始密码。": "Configure email delivery before approval so the applicant can receive their username and initial password.",
+    "账号": "Account",
+    "账号审批策略尚未启用": "Account approval policy is not enabled",
+    "账号已创建，但邮件发送失败，请重试账号邮件": "Account created, but email delivery failed. Retry the account email.",
+    "账号申请审批": "Account applications",
+    "账号邮件": "Account email",
+    "重试账号邮件": "Retry account email"
   }
 }

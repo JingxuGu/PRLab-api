@@ -33,7 +33,7 @@ import {
   onCustomOAuthClicked,
 } from '../../helpers';
 import Turnstile from 'react-turnstile';
-import InvitationRegisterForm from './InvitationRegisterForm';
+import AccountApplicationForm from './AccountApplicationForm';
 import {
   Button,
   Card,
@@ -812,8 +812,8 @@ const RegisterForm = () => {
       status = {};
     }
   }
-  return status?.invitation_registration_enabled ? (
-    <InvitationRegisterForm status={status} />
+  return status?.approval_registration_enabled ? (
+    <AccountApplicationForm status={status} />
   ) : (
     <StandardRegisterForm />
   );

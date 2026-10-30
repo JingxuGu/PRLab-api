@@ -19,13 +19,13 @@ For commercial licensing, please contact support@quantumnous.com
 
 import React from 'react';
 import UsersTable from '../../components/table/users';
-import InvitationApprovals from '../../components/table/users/InvitationApprovals';
+import AccountApplications from '../../components/table/users/AccountApplications';
 import { isRoot } from '../../helpers';
 
 const User = () => {
   return (
     <div className='mt-[60px] px-2'>
-      {isRoot() && <InvitationApprovals />}
+      {isRoot() && <AccountApplications />}
       <UsersTable />
     </div>
   );

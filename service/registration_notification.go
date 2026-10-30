@@ -21,9 +21,9 @@ import (
 )
 
 type registrationMailConfig struct {
-	Host, Account, Password, From, Recipient, SenderName, ReviewURL string
-	Port                                                            int
-	ImplicitTLS, LoginAuth                                          bool
+	Host, Account, Password, From, Recipient, SenderName, ReviewURL, Subject string
+	Port                                                                     int
+	ImplicitTLS, LoginAuth                                                   bool
 }
 
 func registrationMailSettings() (registrationMailConfig, bool) {
@@ -113,7 +113,11 @@ func sendApprovalEmail(c registrationMailConfig, body string) error {
 		return err
 	}
 	from := (&mail.Address{Name: c.SenderName, Address: c.From}).String()
-	message := "From: " + from + "\r\nTo: " + c.Recipient + "\r\nSubject: " + mime.QEncoding.Encode("UTF-8", "Registration approval requested") + "\r\nDate: " + time.Now().Format(time.RFC1123Z) + "\r\nAuto-Submitted: auto-generated\r\nMIME-Version: 1.0\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n" + body
+	subject := c.Subject
+	if subject == "" {
+		subject = "Registration approval requested"
+	}
+	message := "From: " + from + "\r\nTo: " + c.Recipient + "\r\nSubject: " + mime.QEncoding.Encode("UTF-8", subject) + "\r\nDate: " + time.Now().Format(time.RFC1123Z) + "\r\nAuto-Submitted: auto-generated\r\nMIME-Version: 1.0\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n" + body
 	if _, err := w.Write([]byte(message)); err != nil {
 		_ = w.Close()
 		return err
@@ -142,5 +146,41 @@ func NotifyRegistrationRequest(id int) string {
 		}
 	}
 	model.DB.Model(&model.RegistrationRequest{}).Where("id = ?", id).Update("notification_status", status)
+	return status
+}
+
+// Notify only the administrator when an anonymous email application is received.
+func NotifyAccountApplication(id int) string {
+	var application model.AccountApplication
+	if model.DB.First(&application, id).Error != nil || application.Status != "pending" {
+		return "reviewed"
+	}
+	c, ready := registrationMailSettings()
+	status := "unconfigured"
+	if ready {
+		body := fmt.Sprintf("<p>An account application is awaiting your review.</p><p>Request: %d<br>Email: %s</p><p><a href=\"%s\">Sign in as administrator to approve or reject</a></p><p>Approval creates an ordinary account and emails its credentials to the applicant. Opening this link does not approve the application.</p>", application.Id, html.EscapeString(application.Email), html.EscapeString(c.ReviewURL))
+		status = "sent"
+		if sendRegistrationEmail(c, body) != nil {
+			status = "failed"
+		}
+	}
+	model.DB.Model(&model.AccountApplication{}).Where("id = ?", id).Update("notification_status", status)
+	return status
+}
+
+// The generated plaintext password exists only for this mail attempt, not in DB or logs.
+func DeliverApplicationCredentials(application *model.AccountApplication, password string) string {
+	c, ready := registrationMailSettings()
+	status := "failed"
+	if ready && password != "" {
+		c.Recipient = application.Email
+		c.Subject = "Your account is ready"
+		loginURL := strings.TrimSuffix(c.ReviewURL, "/console/user") + "/login"
+		body := fmt.Sprintf("<p>Your account application has been approved.</p><p>Username: <strong>%s</strong><br>Initial password: <strong>%s</strong></p><p><a href=\"%s\">Sign in</a></p><p>You can change this initial password in your personal settings after signing in. Keep this email private and do not forward these credentials.</p>", html.EscapeString(application.Username), html.EscapeString(password), html.EscapeString(loginURL))
+		if sendRegistrationEmail(c, body) == nil {
+			status = "sent"
+		}
+	}
+	model.DB.Model(&model.AccountApplication{}).Where("id = ? AND credential_delivery_status = ?", application.Id, "sending").Update("credential_delivery_status", status)
 	return status
 }

@@ -37,8 +37,8 @@ func getSMTPAuth() smtp.Auth {
 
 // EmailSenderName lets a shared sender identity differ from the application's name.
 func EmailSenderName() string {
-	if name := strings.TrimSpace(os.Getenv("SMTP_FROM_NAME")); name != "" {
-		return name
+	if name, configured := os.LookupEnv("SMTP_FROM_NAME"); configured {
+		return strings.TrimSpace(name)
 	}
 	return SystemName
 }

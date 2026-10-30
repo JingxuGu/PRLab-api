@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 	"net"
+	"os"
 	"strconv"
 	"strings"
 	"testing"
@@ -46,7 +47,13 @@ func TestRegistrationNotificationPersistsWithoutSMTPAndRetries(t *testing.T) {
 	system_setting.ServerAddress = "https://api.example.org"
 	t.Setenv("PRLAB_APPROVAL_EMAIL", "owner@example.org")
 	t.Setenv("SMTP_FROM_NAME", "")
+	require.NoError(t, os.Unsetenv("SMTP_FROM_NAME"))
 	require.Equal(t, common.SystemName, common.EmailSenderName())
+	t.Setenv("SMTP_FROM_NAME", "")
+	require.Empty(t, common.EmailSenderName())
+	config, ready := registrationMailSettings()
+	require.True(t, ready)
+	require.Empty(t, config.SenderName)
 	t.Setenv("SMTP_FROM_NAME", " example.org ")
 	require.Equal(t, "example.org", common.EmailSenderName())
 	sendRegistrationEmail = func(c registrationMailConfig, body string) error {

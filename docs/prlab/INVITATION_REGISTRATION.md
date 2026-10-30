@@ -47,6 +47,7 @@ The real approval recipient belongs in the private environment file, not source 
 `SMTP_FROM_NAME` controls the sender display name for system mail and approval notices,
 independently of the platform name. Use a general domain identity when sharing this sender
 with other applications. If unset, the existing platform-name behavior is preserved.
+Set `SMTP_FROM_NAME=` explicitly to omit the display name and show only the sender address.
 Configure SMTP via the existing root settings page, and set the platform server address
 to its actual HTTPS public origin. Notifications require verified implicit TLS or STARTTLS;
 plaintext SMTP and invalid server certificates are rejected, and delivery has a 15s deadline.

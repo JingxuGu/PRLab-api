@@ -4,7 +4,7 @@
 PR：https://github.com/JingxuGu/PRLab-api/pull/1
 维护基线：prlab-v0.13.2（bee339d279ccecbf8c8a89e14ddbbd902f78bd5d）
 功能分支：feat/invitation-approval
-功能提交：bf75dc447
+功能提交：5f823c225
 
 当前线上仍为原 v0.13.2，站点名 PRLab api；本次仅完成源码、PR、测试和构建，未切换线上服务。
 功能开发阶段选择了“尚无 SMTP，先完成邀请和审批功能”，因此当时未启用真实邮件发送。
@@ -28,9 +28,9 @@ PR：https://github.com/JingxuGu/PRLab-api/pull/1
 - model/controller/router/service 完整测试通过，包括 11 项新增安全测试。
 - 前端冻结依赖的生产构建通过，完整 Go 程序构建通过。
 - 编译均通过 Slurm 的无 GPU 作业执行；模型作业保留运行，本次通用发件名回归构建也未申请 GPU。
-- 最终构建版本：v0.13.2-prlab.2。
-- 产物：/home/llmops/new-api-build/bin/new-api-prlab-v0.13.2-prlab.2。
-- SHA256：cd8d2621bd7d9dac847983e2af7b011a779b19cfacbe878a8f94464db4482006。
+- 最终构建版本：v0.13.2-prlab.3。
+- 产物：/home/llmops/new-api-build/bin/new-api-prlab-v0.13.2-prlab.3。
+- SHA256：954c62602c4c5908c2aa392efed1e37c4473252f765ea484fdfe18058ca33949。
 - 独立构建目录：/home/llmops/new-api-build，不修改系统 Go、Python 或科研环境。
 - 数据库实际运行测试使用 SQLite，未启动额外的 MySQL/PostgreSQL 服务。
 

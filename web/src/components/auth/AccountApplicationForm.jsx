@@ -16,6 +16,7 @@ export default function AccountApplicationForm({ status }) {
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [feedback, setFeedback] = useState(null);
   const [agreed, setAgreed] = useState(false);
   const [turnstile, setTurnstile] = useState('');
   const needsAgreement =
@@ -25,16 +26,27 @@ export default function AccountApplicationForm({ status }) {
       return showError(t('请先阅读并同意用户协议和隐私政策'));
     if (status.turnstile_check && !turnstile)
       return showError(t('请完成人机验证'));
+    setFeedback(null);
     setBusy(true);
     try {
       const { data } = await API.post(
         `/api/user/register?turnstile=${encodeURIComponent(turnstile)}`,
         { email: values.email.trim().toLowerCase() },
+        { skipErrorHandler: true },
       );
       if (data.success) setSubmitted(true);
       else showError(data.message);
     } catch (error) {
-      showError(error.response?.data?.message || t('申请提交失败，请稍后重试'));
+      const duplicate = error.response?.data?.data?.status;
+      if (
+        error.response?.status === 409 &&
+        ['registered', 'pending'].includes(duplicate)
+      )
+        setFeedback(duplicate);
+      else
+        showError(
+          error.response?.data?.message || t('申请提交失败，请稍后重试'),
+        );
     } finally {
       setBusy(false);
     }
@@ -59,9 +71,34 @@ export default function AccountApplicationForm({ status }) {
                 '填写邮箱即可申请账号。管理员审核通过后，系统会通过邮件发放账号和初始密码。',
               )}
             />
+            {feedback && (
+              <Banner
+                type='info'
+                className='mb-4'
+                title={
+                  feedback === 'registered'
+                    ? t('该邮箱已注册')
+                    : t('该邮箱正在审核中')
+                }
+                description={
+                  <>
+                    {feedback === 'registered'
+                      ? t('请直接登录，或联系管理员获取帮助。')
+                      : t('你已提交申请，正在等待管理员审核，请勿重复提交。')}
+                    {feedback === 'registered' && (
+                      <>
+                        {' '}
+                        <Link to='/login'>{t('前往登录')}</Link>
+                      </>
+                    )}
+                  </>
+                }
+              />
+            )}
             <Form onSubmit={submit}>
               <Form.Input
                 field='email'
+                onChange={() => setFeedback(null)}
                 type='email'
                 label={t('申请邮箱')}
                 autoComplete='email'

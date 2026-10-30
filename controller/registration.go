@@ -37,14 +37,19 @@ func RegisterAccountApplication(c *gin.Context) {
 		return
 	}
 	application, err := model.SubmitAccountApplication(input.Email)
-	if err != nil && !errors.Is(err, model.ErrRegistrationConflict) {
+	if errors.Is(err, model.ErrApplicationEmailRegistered) {
+		c.JSON(http.StatusConflict, gin.H{"success": false, "message": "该邮箱已注册，请登录或联系管理员。", "data": gin.H{"status": "registered"}})
+		return
+	}
+	if errors.Is(err, model.ErrApplicationEmailPending) {
+		c.JSON(http.StatusConflict, gin.H{"success": false, "message": "该邮箱已提交申请，正在等待管理员审核，请勿重复提交。", "data": gin.H{"status": "pending"}})
+		return
+	}
+	if err != nil {
 		c.JSON(500, gin.H{"success": false, "message": "申请提交失败，请稍后重试"})
 		return
 	}
-	if application != nil {
-		service.NotifyAccountApplication(application.Id)
-	}
-	// Do not reveal whether an email already has an account or a pending request.
+	service.NotifyAccountApplication(application.Id)
 	c.JSON(202, gin.H{"success": true, "message": "申请已收到。审核通过后，账号和初始密码会发送到申请邮箱。", "data": gin.H{"status": "pending"}})
 }
 

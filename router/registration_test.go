@@ -91,7 +91,9 @@ func TestRegistrationRoutesRequireRootAndPreservePendingState(t *testing.T) {
 	require.Equal(t, "applicant@example.org", application.Email)
 	require.Empty(t, application.Username)
 	w = call(http.MethodPost, "/api/user/register", map[string]string{"email": "applicant@example.org"}, 0)
-	require.Equal(t, 202, w.Code)
+	require.Equal(t, 409, w.Code)
+	require.Contains(t, w.Body.String(), `"status":"pending"`)
+	require.Contains(t, w.Body.String(), "正在等待管理员审核")
 	require.NoError(t, db.Model(&model.AccountApplication{}).Count(&count).Error)
 	require.EqualValues(t, 1, count)
 	w = call(http.MethodGet, "/api/registration/", nil, common.RoleRootUser)
@@ -108,4 +110,13 @@ func TestRegistrationRoutesRequireRootAndPreservePendingState(t *testing.T) {
 	require.Equal(t, 200, w.Code)
 	w = call(http.MethodPost, "/api/registration/requests/1/review", map[string]string{"action": "reject"}, common.RoleRootUser)
 	require.Equal(t, 409, w.Code)
+	registered := model.User{Username: "existing", Email: "existing@example.org", Password: "test-fixture-hash", Role: common.RoleCommonUser, Status: common.UserStatusEnabled}
+	require.NoError(t, db.Create(&registered).Error)
+	w = call(http.MethodPost, "/api/user/register", map[string]string{"email": " EXISTING@EXAMPLE.ORG "}, 0)
+	require.Equal(t, 409, w.Code)
+	require.Contains(t, w.Body.String(), `"status":"registered"`)
+	require.Contains(t, w.Body.String(), "该邮箱已注册")
+	require.NoError(t, db.Model(&model.AccountApplication{}).Count(&count).Error)
+	require.EqualValues(t, 1, count)
+
 }

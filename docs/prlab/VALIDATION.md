@@ -10,7 +10,7 @@ bun --bun run build
 The regression suite includes email-only pending requests, duplicate normalization, ordinary credential
 creation, concurrent review, failed-delivery recovery and protecting established users from credential
 retry resets. Router checks reject malformed email, preserve root-only access, ignore username/password/
-role overposting and acknowledge duplicate email consistently. Notification checks verify recipient
+role overposting and distinguish existing accounts from duplicate pending applications. Notification checks verify recipient
 separation, omission of the display name, and plaintext password inclusion only in the applicant mail.
 The existing verified-TLS and legacy-model regressions remain covered.
 

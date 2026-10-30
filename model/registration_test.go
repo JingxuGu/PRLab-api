@@ -160,7 +160,7 @@ func TestEmailApplicationNeedsOnlyEmailAndRejectsDuplicates(t *testing.T) {
 	require.NoError(t, DB.Model(&User{}).Count(&count).Error)
 	require.Zero(t, count)
 	_, err = SubmitAccountApplication("applicant@example.org")
-	require.ErrorIs(t, err, ErrRegistrationConflict)
+	require.ErrorIs(t, err, ErrApplicationEmailPending)
 	rejected, password, err := ReviewAccountApplication(req.Id, 1, 0, false)
 	require.NoError(t, err)
 	require.Empty(t, password)
@@ -193,7 +193,7 @@ func TestEmailApprovalGeneratesOrdinaryCredentialsOnlyOnce(t *testing.T) {
 	require.Error(t, err)
 	require.Empty(t, again)
 	_, err = SubmitAccountApplication(req.Email)
-	require.ErrorIs(t, err, ErrRegistrationConflict)
+	require.ErrorIs(t, err, ErrApplicationEmailRegistered)
 }
 
 func TestEmailApprovalSerializesConcurrentReviews(t *testing.T) {

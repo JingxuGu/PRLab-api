@@ -13,9 +13,8 @@ replacing the previous invitation-only design. Upstream attribution and existing
    only as bcrypt; plaintext exists transiently for that mail attempt and is never returned by an API.
 7. The applicant can log in and change the initial password in personal settings.
 
-Rejection creates no account and releases the pending email reservation. Duplicate pending or
-existing-account email submissions receive the same public acknowledgement and do not send duplicate
-notifications. Existing OAuth and WeChat bindings may log in; automatic new-account creation cannot
+Rejection creates no account and releases the pending email reservation. Duplicate pending emails are identified as awaiting review; existing-account emails are identified as
+already registered. Neither case creates another request or sends duplicate notifications. Existing OAuth and WeChat bindings may log in; automatic new-account creation cannot
 bypass administrator approval.
 
 ## Private runtime settings
@@ -52,8 +51,7 @@ No plaintext password outbox is persisted.
 ## API
 
 Public: `POST /api/user/register` with `{ "email": "applicant@example.org" }` returns HTTP 202.
-Existing Turnstile and request-rate controls remain applied. Public responses do not reveal whether
-an email is already registered or awaiting review.
+Existing Turnstile and request-rate controls remain applied. HTTP 409 identifies an existing email as `registered` or `pending`, with an inline prompt in the form.
 
 Root-only endpoints:
 

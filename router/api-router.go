@@ -58,10 +58,9 @@ func SetApiRouter(router *gin.Engine) {
 		approvalRoute.Use(middleware.RootAuth(), middleware.DisableCache())
 		{
 			approvalRoute.GET("/", controller.GetRegistrationApprovals)
-			approvalRoute.POST("/invitations", middleware.CriticalRateLimit(), controller.CreateRegistrationInvitation)
-			approvalRoute.POST("/invitations/:id/revoke", controller.RevokeRegistrationInvitation)
 			approvalRoute.POST("/requests/:id/review", controller.ReviewRegistrationRequest)
 			approvalRoute.POST("/requests/:id/notify", middleware.CriticalRateLimit(), controller.NotifyRegistrationRequest)
+			approvalRoute.POST("/requests/:id/credentials", middleware.CriticalRateLimit(), controller.RetryRegistrationCredentials)
 		}
 
 		userRoute := apiRouter.Group("/user")

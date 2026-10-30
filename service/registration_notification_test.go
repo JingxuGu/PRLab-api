@@ -103,3 +103,57 @@ func TestRegistrationSMTPRejectsPlaintextBeforeAuthentication(t *testing.T) {
 	require.Error(t, err)
 	require.NotContains(t, strings.ToUpper(<-commands), "AUTH")
 }
+
+func TestEmailApplicationNotifiesOwnerThenDeliversGeneratedCredentials(t *testing.T) {
+	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	require.NoError(t, err)
+	oldDB := model.DB
+	model.DB = db
+	t.Cleanup(func() { model.DB = oldDB })
+	require.NoError(t, db.AutoMigrate(&model.User{}, &model.AccountApplication{}))
+	oldHost, oldFrom, oldPort, oldBase, oldSender := common.SMTPServer, common.SMTPFrom, common.SMTPPort, system_setting.ServerAddress, sendRegistrationEmail
+	t.Cleanup(func() {
+		common.SMTPServer = oldHost
+		common.SMTPFrom = oldFrom
+		common.SMTPPort = oldPort
+		system_setting.ServerAddress = oldBase
+		sendRegistrationEmail = oldSender
+	})
+	common.SMTPServer = "smtp.example.org"
+	common.SMTPFrom = "sender@example.org"
+	common.SMTPPort = 587
+	system_setting.ServerAddress = "https://api.example.org"
+	t.Setenv("PRLAB_APPROVAL_EMAIL", "owner@example.org")
+	t.Setenv("SMTP_FROM_NAME", "")
+	req, err := model.SubmitAccountApplication("applicant@example.org")
+	require.NoError(t, err)
+	sendRegistrationEmail = func(c registrationMailConfig, body string) error {
+		require.Equal(t, "owner@example.org", c.Recipient)
+		require.Contains(t, body, "applicant@example.org")
+		require.Contains(t, body, "/console/user")
+		require.NotContains(t, body, "Initial password")
+		require.Empty(t, c.SenderName)
+		return nil
+	}
+	require.Equal(t, "sent", NotifyAccountApplication(req.Id))
+	approved, password, err := model.ReviewAccountApplication(req.Id, 1, 100, true)
+	require.NoError(t, err)
+	sendRegistrationEmail = func(c registrationMailConfig, body string) error {
+		require.Equal(t, "applicant@example.org", c.Recipient)
+		require.Equal(t, "Your account is ready", c.Subject)
+		require.Contains(t, body, approved.Username)
+		require.Contains(t, body, password)
+		require.Contains(t, body, "https://api.example.org/login")
+		return errors.New("synthetic failure")
+	}
+	require.Equal(t, "failed", DeliverApplicationCredentials(approved, password))
+	approved, password, err = model.RetryApplicationCredentials(req.Id)
+	require.NoError(t, err)
+	sendRegistrationEmail = func(c registrationMailConfig, body string) error { require.Contains(t, body, password); return nil }
+	require.Equal(t, "sent", DeliverApplicationCredentials(approved, password))
+	require.NoError(t, db.First(&approved, req.Id).Error)
+	require.Equal(t, "sent", approved.CredentialDeliveryStatus)
+	require.Equal(t, "reviewed", NotifyAccountApplication(req.Id))
+	_, _, err = model.RetryApplicationCredentials(req.Id)
+	require.Error(t, err)
+}

@@ -32,6 +32,7 @@ export default function AccountApplicationForm({ status }) {
       const { data } = await API.post(
         `/api/user/register?turnstile=${encodeURIComponent(turnstile)}`,
         { email: values.email.trim().toLowerCase() },
+        { skipErrorHandler: true },
       );
       if (data.success) setSubmitted(true);
       else showError(data.message);

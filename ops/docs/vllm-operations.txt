@@ -1,5 +1,5 @@
 llmops Qwen3.8 图文服务
-部署日期：2026-10-28，Asia/Shanghai
+部署日期：2026-10-28，Asia/Shanghai；上下文更新：2026-10-31
 
 连接与组件
   SSH：ssh lab-server；部署账户 llmops。
@@ -33,7 +33,7 @@ llmops Qwen3.8 图文服务
   四人共用一个模型实例，vLLM max-num-seqs=4。
   不接纳 n>1、best_of>1 或批量文本提示，避免一个请求展开为多路生成。
   入口仅运行一个 worker；增加 worker 会破坏当前全局四请求计数。
-  请求体上限 8 MiB；上下文为 8,192 token，包含图片与输出预算。
+  请求体上限 8 MiB；上下文为 16,384 token，包含图片与输出预算。
   每个请求最多一张图片，处理后最大约 1,048,576 像素；视频未启用。
   关闭 CUDA Graph（enforce-eager），避免单张 5090 启动图捕获的显存峰值。
   KV 缓存初始保留模型原生精度；GPU 内存预算为 90%，实际以启动和并发验证为准。
@@ -118,3 +118,15 @@ Python 客户端示例（在有 openai 包的客户端环境中运行）
   稳态显存观测约 30,445–30,859 MiB（29.7–30.1 GiB，含桌面图形占用）。
   运行参数关闭 CUDA Graph，保留 BF16 KV 缓存，不启用推测解码。
   首次请求会发生部分 Triton 内核 JIT 预热，缓存保存在独立部署目录。
+
+16K 上下文更新（2026-10-31）
+  max-model-len 已由 8192 调整为 16384；输入、历史、图片与输出合计受此上限约束。
+  max-num-seqs=4、网关全局四请求、BF16/auto KV、gpu-memory-utilization=0.90 保留。
+  max-num-batched-tokens=8192 是每轮批处理预算，不是单请求总上下文上限。
+  本次启动日志观察 KV cache 2.47 GiB / 34816 tokens，满 16384-token 请求的缓存并发估算为 2.12。
+  因此四个普通请求可以接纳，多个长请求会共享缓存并可能等待或变慢；不承诺四个满 16K 请求同时驻留。
+  验收：通过 New API 的 10017-token 输入成功；1024×1024 红蓝图片理解成功；四路普通请求成功。
+  完成后网关活动计数归零，显存观察约 30639 MiB 使用 / 1471 MiB 空闲。
+  变更前已备份原 sbatch，只重启模型管理服务。科研分区、调度和已有研究进程未改动。
+  私密配置目录中的 context-release.json 记录原配置备份位置，context-verification.json 记录验收摘要。
+  公开摘要见 docs/evidence/vllm/context-16k-verification.json；恢复前先等待活动请求结束。

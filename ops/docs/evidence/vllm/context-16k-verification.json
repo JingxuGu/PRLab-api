@@ -1,0 +1,18 @@
+{
+  "max_model_len": 16384,
+  "long_prompt_tokens": 10017,
+  "image_1024_passed": true,
+  "four_simultaneous_ordinary_requests_passed": true,
+  "gateway_max_requests": 4,
+  "gateway_active_requests_after_test": 0,
+  "full_16k_requests_concurrency_estimate": 2.12,
+  "kv_cache_capacity_tokens": 34816,
+  "kv_cache_dtype": "auto",
+  "gpu_memory_utilization": 0.9,
+  "note": "Four long 16K requests are not guaranteed to fit together; cache is shared.",
+  "checked_date": "2026-10-31",
+  "timezone": "Asia/Shanghai",
+  "gpu_memory_used_mib_after_test": 30639,
+  "gpu_memory_free_mib_after_test": 1471,
+  "research_priority_and_partitions_unchanged": true
+}

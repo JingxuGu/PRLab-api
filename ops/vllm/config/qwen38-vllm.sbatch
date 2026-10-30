@@ -36,7 +36,7 @@ exec /home/llmops/llm/venv/bin/vllm serve /home/llmops/llm/models/Qwen3.8-27B-NV
     --served-model-name qwen3.8-27b \
     --host 127.0.0.1 --port 8001 \
     --tensor-parallel-size 1 \
-    --max-model-len 8192 \
+    --max-model-len 16384 \
     --max-num-seqs 4 \
     --max-num-batched-tokens 8192 \
     --gpu-memory-utilization 0.90 \

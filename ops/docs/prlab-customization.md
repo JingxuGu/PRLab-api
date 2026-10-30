@@ -4,11 +4,13 @@
 PR：https://github.com/JingxuGu/PRLab-api/pull/1
 维护基线：prlab-v0.13.2（bee339d279ccecbf8c8a89e14ddbbd902f78bd5d）
 功能分支：feat/invitation-approval
-功能提交：777c5e80166a44ade6f9cf8abbf04f2d9959ca36
+功能提交：bf75dc447
 
 当前线上仍为原 v0.13.2，站点名 PRLab api；本次仅完成源码、PR、测试和构建，未切换线上服务。
 功能开发阶段选择了“尚无 SMTP，先完成邀请和审批功能”，因此当时未启用真实邮件发送。
-后续已选择 Mailjet 作为服务商，域名验证、服务器凭据及实际投递仍待配置和验收。
+2026-10-31：Mailjet 域名与发件地址已激活，凭据已在服务器隐藏录入，管理员确认收到测试邮件。
+通用发件名通过 SMTP_FROM_NAME 配置，与平台名称分开；真实名称及收件人仍仅保留在服务器私密文件中。
+现有平台仍为上游 v0.13.2，邀请审批版尚未部署，完整注册通知链路仍需上线后验收。
 实际审批收件邮箱须作为服务器私密环境变量配置，公开 fork 不包含此地址。
 
 ## 新功能
@@ -25,10 +27,10 @@ PR：https://github.com/JingxuGu/PRLab-api/pull/1
 
 - model/controller/router/service 完整测试通过，包括 11 项新增安全测试。
 - 前端冻结依赖的生产构建通过，完整 Go 程序构建通过。
-- 编译均通过 Slurm 的无 GPU 作业执行；模型作业 16 始终保留运行。
-- 最终构建版本：v0.13.2-prlab.1。
-- 产物：/home/llmops/new-api-build/bin/new-api-prlab。
-- SHA256：81e34cecc1bc6f431c7869f8df1f5c9ac3cf9cc327b393377ad7a6ea942beea0。
+- 编译均通过 Slurm 的无 GPU 作业执行；模型作业保留运行，本次通用发件名回归构建也未申请 GPU。
+- 最终构建版本：v0.13.2-prlab.2。
+- 产物：/home/llmops/new-api-build/bin/new-api-prlab-v0.13.2-prlab.2。
+- SHA256：cd8d2621bd7d9dac847983e2af7b011a779b19cfacbe878a8f94464db4482006。
 - 独立构建目录：/home/llmops/new-api-build，不修改系统 Go、Python 或科研环境。
 - 数据库实际运行测试使用 SQLite，未启动额外的 MySQL/PostgreSQL 服务。
 
@@ -42,7 +44,7 @@ PR：https://github.com/JingxuGu/PRLab-api/pull/1
 6. 原子替换为已验证程序并重启 New API，然后启用注册总开关和密码注册开关。
    邀请策略会接管公开注册，仍需要有效邀请和管理员审批。
 7. 验证站点名称、现有账户/渠道/令牌、待审批限制、批准后登录及四请求网关。
-8. 邮件服务另行配置。当前 New API 的 IPAddressDeny/Allow 仅允许回环，
-   SMTP 接入需对选定邮件服务器添加受限网络许可，不能直接删除网络隔离规则。
+8. Mailjet SMTP 已通过实际投递测试，现有 IPAddressDeny 保留，专用 drop-in 仅增加 Mailjet 精确地址许可。
+   后续按 New API 运维文档刷新 DNS 地址许可；完整注册申请的通知仍需在新版本上验证。
 
 回滚到上游旧程序前必须先关闭注册总开关，以防旧版本忽略邀请策略。

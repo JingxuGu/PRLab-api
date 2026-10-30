@@ -26,6 +26,7 @@ Slurm research 分区：高优先级，可抢占并重新排队 llm 作业。
 - [Slurm 调度和科研提交](docs/slurm-operations.txt)
 - [vLLM、图文推理与并发网关](docs/vllm-operations.txt)
 - [New API、账号管理与域名接入](docs/new-api-operations.md)
+- [Mailjet SMTP 安全录入与测试](docs/new-api-operations.md#mailjet-smtp-接入)
 - [部署目录与恢复步骤](docs/RECOVERY.md)
 - [凭据与提交规则](docs/SECRETS.md)
 

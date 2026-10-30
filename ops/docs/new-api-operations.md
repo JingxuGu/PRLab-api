@@ -149,3 +149,56 @@ python3 /home/llmops/new-api/bin/backup-db.py
 - 原模型 Slurm 作业 16 继续运行，没有重启模型或改变科研抢占配置。
 
 验收详情：[API 结果](evidence/new-api/api-verification.json)、[状态快照](evidence/new-api/state-verification.json)、[发行校验](../new-api/config/release.json)。
+
+## Mailjet SMTP 接入
+
+准备记录：2026-10-31。发件地址及域名已在 Mailjet 激活；本节说明服务器录入流程。
+Mailjet 凭据不进入 Git、聊天、命令参数或 shell 历史。真实发件人与审批收件人放在服务器私密配置。
+目前只完成无凭据的连通性与证书验证；实际认证、测试投递和设置保存需要管理员在终端输入 Key。
+邮件接入与邀请审批版本部署分开进行，录入脚本不修改注册总开关和密码注册开关。
+
+1. 将 [configure-mailjet.py](../new-api/bin/configure-mailjet.py) 和
+   [refresh-mailjet-network.py](../new-api/bin/refresh-mailjet-network.py) 安装到部署目录的 `bin/`，权限 0700。
+2. 在服务器创建 `config/mailjet-settings.json`，目录 0700、文件 0600；内容结构如下，
+   实际值仅在服务器填写，`admin_username` 必须是现有超级管理员：
+
+   ```json
+   {"from":"noreply@example.org","recipient":"owner@example.org","admin_username":"example-admin"}
+   ```
+
+   新版邀请审批通知还需在私密 `service.env` 设置 `PRLAB_APPROVAL_EMAIL` 为同一收件邮箱。
+   修改前保留该文件的受限备份；此环境变量需要平台重启后才被读取。
+3. 运行网络配置工具（需要部署账户已有的 sudo 权限）：
+
+   ```bash
+   python3 /home/llmops/new-api/bin/refresh-mailjet-network.py --apply
+   python3 /home/llmops/new-api/bin/configure-mailjet.py --check
+   ```
+
+   它解析 `in-v3.mailjet.com` 的精确公网地址，先在临时受限服务内验证 STARTTLS，
+   再写入 `/etc/systemd/system/new-api.service.d/40-mailjet.conf`。
+   原 IPAddressDeny 与回环许可保留，仅增加 Mailjet 地址；仅重启 New API 并等待 HTTP 就绪。
+   不请求 GPU、不修改模型服务或 Slurm。服务级 IP 规则按 IP 生效，不按端口过滤。
+   如果 Mailjet DNS 地址变化，重新运行此工具刷新许可；不直接删除网络隔离规则。
+4. 在管理员自己的终端运行（全部 Key 隐藏输入）：
+
+   ```bash
+   ssh -t lab-server /home/llmops/new-api/bin/configure-mailjet.py
+   ```
+
+   工具先验证现有 root 管理员会话并创建私密 SQLite 一致性备份；初始密码已更改时会隐藏提示输入现密码。
+   输入 API Key 和 Secret Key 后，通过证书验证的 `587 + STARTTLS` 认证，向私密配置中的审批邮箱发送一封测试邮件。
+   Mailjet 接受邮件后才通过本机管理员 API 保存 SMTP 设置，Key 不另存临时文件，退出时注销会话。
+   `SMTPSSLEnabled=false` 表示使用 STARTTLS 升级加密；不是使用明文连接发送凭据。
+   不要使用 shell 跟踪、终端录屏、SMTP 调试输出或将 Key 作为参数传入。
+5. 检查收件箱和垃圾邮件，并在 Mailjet 事务邮件记录中核对投递结果。
+   “Mailjet accepted”只表示提供商已接收，不代表收件邮箱一定收到。
+   `config/mailjet-configured.json` 只记录无凭据状态；真实凭据保存在受限平台数据库中，数据库及备份不得提交。
+   SMTP 成功后再按 [邀请审批部署说明](prlab-customization.md) 上线功能并验证完整注册流程。
+
+故障处理：工具只输出错误类型，不输出异常详情或凭据。失败时保持注册关闭，按网络、认证、投递、平台保存分层检查。
+如需撤销邮件网络许可，移除专用 `40-mailjet.conf`，执行 daemon-reload 并只重启 New API；
+其他服务配置保持原样。SMTP 设置本身不会因撤销网络许可而自动清除。
+
+Mailjet 官方参考：[SMTP 配置](https://dev.mailjet.com/docs/smtp-relay/configuration)、
+[凭据获取](https://documentation.mailjet.com/hc/en-us/articles/360043229473-How-can-I-configure-my-SMTP-parameters)。

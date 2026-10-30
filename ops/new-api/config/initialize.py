@@ -36,7 +36,7 @@ settings={
  'ModelRatio':json.dumps({'qwen3.8-27b':1}),
  'CompletionRatio':json.dumps({'qwen3.8-27b':1}),
  'GroupRatio':json.dumps({'default':1}),'UserUsableGroups':json.dumps({'default':'实验室'}),
- 'Notice':'科研任务优先。推理最多同时 4 个请求，忙时稍后重试；科研抢占期间服务暂不可用。支持单张图片，建议 data URL 上传；上下文 16384 token。',
+ 'Notice':'科研任务优先。服务繁忙或资源调度期间，请稍后重试。',
 }
 for k,v in settings.items():req(admin,'/api/option/',{'key':k,'value':v},'PUT',aid)
 channels=req(admin,'/api/channel/?p=1&page_size=100',uid=aid)['data']

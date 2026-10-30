@@ -208,3 +208,6 @@ Mailjet 凭据不进入 Git、聊天、命令参数或 shell 历史。真实发�
 
 Mailjet 官方参考：[SMTP 配置](https://dev.mailjet.com/docs/smtp-relay/configuration)、
 [凭据获取](https://documentation.mailjet.com/hc/en-us/articles/360043229473-How-can-I-configure-my-SMTP-parameters)。
+
+2026-10-31 公告调整：平台首页公告仅保留科研优先与服务忙时重试提示，不再统一展示并发、上下文、图片数量等模型专属限制。
+这些参数仍在各模型运行配置和对应运维记录中维护，不通过公告描述全平台模型。首次安装模板已同步，未重新初始化平台。

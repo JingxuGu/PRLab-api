@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"strings"
 	"time"
 
@@ -11,6 +12,9 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
+
+var ErrApplicationEmailRegistered = errors.New("application email already registered")
+var ErrApplicationEmailPending = errors.New("application email already pending")
 
 // An application reserves only an email. Credentials do not exist until approval.
 type AccountApplication struct {
@@ -35,18 +39,22 @@ func SubmitAccountApplication(email string) (*AccountApplication, error) {
 		return nil, err
 	}
 	if count > 0 {
-		return nil, ErrRegistrationConflict
+		return nil, ErrApplicationEmailRegistered
 	}
 	if err := DB.Model(&AccountApplication{}).Where("pending_email = ?", email).Count(&count).Error; err != nil {
 		return nil, err
 	}
 	if count > 0 {
-		return nil, ErrRegistrationConflict
+		return nil, ErrApplicationEmailPending
 	}
 	application := &AccountApplication{Email: email, PendingEmail: &email, Status: "pending", CreatedAt: time.Now().Unix(), NotificationStatus: "pending", CredentialDeliveryStatus: "not_applicable"}
 	// A unique nullable email reservation prevents concurrent duplicate applications.
 	if err := DB.Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).Create(application).Error; err != nil {
-		return nil, ErrRegistrationConflict
+		var pending int64
+		if DB.Model(&AccountApplication{}).Where("pending_email = ?", email).Count(&pending).Error == nil && pending > 0 {
+			return nil, ErrApplicationEmailPending
+		}
+		return nil, err
 	}
 	return application, nil
 }

@@ -3848,6 +3848,11 @@
     "账号已创建，但邮件发送失败，请重试账号邮件": "Account created, but email delivery failed. Retry the account email.",
     "账号申请审批": "Account applications",
     "账号邮件": "Account email",
-    "重试账号邮件": "Retry account email"
+    "重试账号邮件": "Retry account email",
+    "该邮箱已注册": "This email is already registered",
+    "该邮箱正在审核中": "This email is awaiting review",
+    "请直接登录，或联系管理员获取帮助。": "Sign in directly, or contact the administrator for help.",
+    "你已提交申请，正在等待管理员审核，请勿重复提交。": "Your application is awaiting administrator review. Please do not submit it again.",
+    "前往登录": "Go to sign in"
   }
 }

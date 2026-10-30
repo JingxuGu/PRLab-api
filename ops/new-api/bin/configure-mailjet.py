@@ -13,7 +13,7 @@ import ssl
 import subprocess
 import sys
 from email.message import EmailMessage
-from email.utils import formatdate, make_msgid
+from email.utils import formataddr, formatdate, make_msgid
 import urllib.request
 
 BASE = Path(__file__).resolve().parents[1]
@@ -102,13 +102,14 @@ def main():
             if not 16 <= len(value) <= 512 or any(c.isspace() for c in value) or not value.isascii():
                 raise ValueError('Invalid credential format')
         message = EmailMessage()
-        message['From'] = 'PRLab api <' + settings['from'] + '>'
+        from_name = settings.get('from_name') or settings['from'].split('@')[1]
+        message['From'] = formataddr((from_name, settings['from']))
         message['To'] = settings['recipient']
-        message['Subject'] = 'PRLab api - Mailjet connection test'
+        message['Subject'] = 'Mailjet SMTP connection test'
         message['Date'] = formatdate(localtime=True)
         message['Message-ID'] = make_msgid(domain=settings['from'].split('@')[1])
         message['Auto-Submitted'] = 'auto-generated'
-        message.set_content('PRLab api 的 Mailjet 加密 SMTP 连接测试。\n这封邮件仅用于验证投递，不会创建账号或批准注册申请。\n邮件中不包含密码、API Key 或邀请链接。')
+        message.set_content('Mailjet 加密 SMTP 连接测试。\n这封邮件仅用于验证投递。\n邮件中不包含密码、API Key 或邀请链接。')
         with smtp_connection() as client:
             client.login(api_key, secret_key)
             refused = client.send_message(message)

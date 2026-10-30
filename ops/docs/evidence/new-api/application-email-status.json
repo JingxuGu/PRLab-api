@@ -1,0 +1,20 @@
+{
+  "checked_date": "2026-10-31",
+  "version": "v0.13.2-prlab.5",
+  "source_commit": "1b43285746ace43ebbab71f2894c699445df3742",
+  "merge_commit": "3890f62a997231ddfabf0434eb04790db3dda99e",
+  "binary_sha256": "d0040000956f14e6a691498623912f1f8a0402ac19466ee59103f2c6816983ed",
+  "checks": {
+    "registered_email_http_409_and_sign_in_prompt": true,
+    "pending_email_http_409_and_review_prompt": true,
+    "case_and_whitespace_normalization": true,
+    "duplicates_create_no_new_application": true,
+    "new_email_http_202": true,
+    "regression_tests_and_builds_passed": true,
+    "public_version_and_application_page": true,
+    "existing_accounts_and_requests_preserved": true
+  },
+  "test_scope": "private database copy with SMTP disabled",
+  "production_test_submissions": 0,
+  "model_and_gateway_not_restarted": true
+}

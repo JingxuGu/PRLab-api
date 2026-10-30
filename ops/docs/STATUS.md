@@ -18,7 +18,7 @@
 | FlashInfer | 0.6.14，cubin 与 cu130 JIT cache 配套 |
 | 模型 | Inferact/Qwen3.8-27B-NVFP4 |
 | 模型提交 | 6128240ebaf4eaa7bad2b3d1c72c37d677c5f462 |
-| New API | v0.13.2-prlab.4，源码和程序校验值见上线记录 |
+| New API | v0.13.2-prlab.5，源码和程序校验值见上线记录 |
 | API 模型名 | qwen3.8-27b |
 | 上下文 / 多模态 | 16384 token，1 张图片，约 1MP；不启用视频 |
 | 并发 | 网关全局最多 4 个请求，第 5 个 429 |

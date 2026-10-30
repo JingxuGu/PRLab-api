@@ -1,12 +1,12 @@
 # PRLab 邮箱申请制：已上线
 
-2026-10-31（Asia/Shanghai）上线 `v0.13.2-prlab.4`，替换先前理解有误的邀请制。
+2026-10-31（Asia/Shanghai）上线 `v0.13.2-prlab.5`，替换先前理解有误的邀请制。
 
 - 发布分支：`prlab-v0.13.2`，独立于 main 中的上游新版本。
-- 已合并 PR：[邮箱申请与账号发放 #2](https://github.com/JingxuGu/PRLab-api/pull/2)。
-- 源码提交：`9b9ab547d07f0cc910f6d45188f6aaa77db3c2c8`。
-- 合并提交：`f1252de489d0deb2bbeff1430487473de710e271`。
-- 程序 SHA256：`31ae18ca4f3930ce7651d76b32b5f1897c64c06374b606bc08b0e5b47f2490fb`。
+- 已合并 PR：[邮箱申请与账号发放 #2](https://github.com/JingxuGu/PRLab-api/pull/2)，以及 [重复邮箱提示 #3](https://github.com/JingxuGu/PRLab-api/pull/3)。
+- 源码提交：`1b43285746ace43ebbab71f2894c699445df3742`。
+- 合并提交：`3890f62a997231ddfabf0434eb04790db3dda99e`。
+- 程序 SHA256：`d0040000956f14e6a691498623912f1f8a0402ac19466ee59103f2c6816983ed`。
 
 ## 实际流程
 
@@ -63,7 +63,7 @@ OAuth/微信新账号不能绕过审批；已有绑定账号保持可登录。
 ## 维护与回滚
 
 下列路径是公开示例，按 [迁移说明](../MIGRATION.md)替换真实部署用户和目录。
-当前程序：`/home/llmops/new-api/bin/new-api-prlab-v0.13.2-prlab.4`。
+当前程序：`/home/llmops/new-api/bin/new-api-prlab-v0.13.2-prlab.5`。
 发布切换位于 `new-api.service.d/50-prlab-release.conf`，仅覆盖 ExecStart。
 原 CPU、内存、设备、文件系统及网络拒绝规则保留，Mailjet 的精确地址许可仍在独立 drop-in 中。
 私密 `config/prlab-release.json` 记录当前校验值、源码与备份位置。
@@ -73,3 +73,15 @@ OAuth/微信新账号不能绕过审批；已有绑定账号保持可登录。
 上线已有真实申请后，不用旧数据库覆盖现有数据。保留申请表，按记录人工处理未审核申请或安排迁移。
 正式库的收尾使用只读核对及既有账号正常调用，不重放完整注册测试。
 源码维护说明见发布分支的 `docs/prlab/INVITATION_REGISTRATION.md`（历史文件名保留，内容已经改为申请制）。
+
+## 重复邮箱提示（v0.13.2-prlab.5）
+
+用户要求在申请页明确提示已有账号：
+- 正式账号已存在：HTTP 409 / registered，页面显示“该邮箱已注册”，并提供登录入口。
+- 已有待审批申请：HTTP 409 / pending，页面显示“该邮箱正在审核中”，提醒不要重复提交。
+- 新邮箱：保持正常申请流程，HTTP 202。
+
+大小写和首尾空格统一处理，重复提交不新增申请或重复通知。页面使用内嵌提示，避免同时弹出通用网络错误。
+已通过模型/控制器/路由/服务回归、前端构建、完整 Go 构建，以及私有数据库副本中的三类实际 HTTP 请求验证。
+此次没有更改表结构，发布仅更新 API 平台程序，原有用户与待审批申请保留，失败回滚程序/环境而不覆盖正式数据库。
+无正式测试提交；公网新版与页面可达性已核对。模型及并发网关未重启。

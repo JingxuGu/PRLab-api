@@ -21,14 +21,14 @@ import (
 )
 
 type registrationMailConfig struct {
-	Host, Account, Password, From, Recipient, SiteName, ReviewURL string
-	Port                                                          int
-	ImplicitTLS, LoginAuth                                        bool
+	Host, Account, Password, From, Recipient, SenderName, ReviewURL string
+	Port                                                            int
+	ImplicitTLS, LoginAuth                                          bool
 }
 
 func registrationMailSettings() (registrationMailConfig, bool) {
 	common.OptionMapRWMutex.RLock()
-	c := registrationMailConfig{Host: common.SMTPServer, Port: common.SMTPPort, Account: common.SMTPAccount, Password: common.SMTPToken, From: common.SMTPFrom, SiteName: common.SystemName, ImplicitTLS: common.SMTPSSLEnabled || common.SMTPPort == 465, LoginAuth: common.SMTPForceAuthLogin}
+	c := registrationMailConfig{Host: common.SMTPServer, Port: common.SMTPPort, Account: common.SMTPAccount, Password: common.SMTPToken, From: common.SMTPFrom, SenderName: common.EmailSenderName(), ImplicitTLS: common.SMTPSSLEnabled || common.SMTPPort == 465, LoginAuth: common.SMTPForceAuthLogin}
 	base := system_setting.ServerAddress
 	common.OptionMapRWMutex.RUnlock()
 	c.Recipient = strings.TrimSpace(os.Getenv("PRLAB_APPROVAL_EMAIL"))
@@ -112,7 +112,7 @@ func sendApprovalEmail(c registrationMailConfig, body string) error {
 	if err != nil {
 		return err
 	}
-	from := (&mail.Address{Name: c.SiteName, Address: c.From}).String()
+	from := (&mail.Address{Name: c.SenderName, Address: c.From}).String()
 	message := "From: " + from + "\r\nTo: " + c.Recipient + "\r\nSubject: " + mime.QEncoding.Encode("UTF-8", "Registration approval requested") + "\r\nDate: " + time.Now().Format(time.RFC1123Z) + "\r\nAuto-Submitted: auto-generated\r\nMIME-Version: 1.0\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n" + body
 	if _, err := w.Write([]byte(message)); err != nil {
 		_ = w.Close()

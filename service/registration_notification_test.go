@@ -45,7 +45,12 @@ func TestRegistrationNotificationPersistsWithoutSMTPAndRetries(t *testing.T) {
 	common.SMTPPort = 465
 	system_setting.ServerAddress = "https://api.example.org"
 	t.Setenv("PRLAB_APPROVAL_EMAIL", "owner@example.org")
+	t.Setenv("SMTP_FROM_NAME", "")
+	require.Equal(t, common.SystemName, common.EmailSenderName())
+	t.Setenv("SMTP_FROM_NAME", " example.org ")
+	require.Equal(t, "example.org", common.EmailSenderName())
 	sendRegistrationEmail = func(c registrationMailConfig, body string) error {
+		require.Equal(t, "example.org", c.SenderName)
 		require.Equal(t, "owner@example.org", c.Recipient)
 		require.Contains(t, body, "&lt;unsafe&gt;")
 		require.NotContains(t, body, req.PasswordHash)

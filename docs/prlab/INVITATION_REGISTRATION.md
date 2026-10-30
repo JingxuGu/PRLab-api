@@ -31,6 +31,7 @@ Keep private environment values on the server, outside Git:
 ```dotenv
 INVITATION_REGISTRATION_ENABLED=true
 PRLAB_APPROVAL_EMAIL=administrator@example.org
+SMTP_FROM_NAME=example.org
 ```
 
 The PRLab branch enables the invitation policy by default; explicitly set the variable above in production as well.
@@ -43,6 +44,9 @@ New OAuth/WeChat account creation is blocked while the invitation policy is acti
 existing bound accounts can continue to sign in.
 
 The real approval recipient belongs in the private environment file, not source code.
+`SMTP_FROM_NAME` controls the sender display name for system mail and approval notices,
+independently of the platform name. Use a general domain identity when sharing this sender
+with other applications. If unset, the existing platform-name behavior is preserved.
 Configure SMTP via the existing root settings page, and set the platform server address
 to its actual HTTPS public origin. Notifications require verified implicit TLS or STARTTLS;
 plaintext SMTP and invalid server certificates are rejected, and delivery has a 15s deadline.

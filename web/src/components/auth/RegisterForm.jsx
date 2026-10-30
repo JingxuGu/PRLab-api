@@ -33,6 +33,7 @@ import {
   onCustomOAuthClicked,
 } from '../../helpers';
 import Turnstile from 'react-turnstile';
+import InvitationRegisterForm from './InvitationRegisterForm';
 import {
   Button,
   Card,
@@ -65,7 +66,7 @@ import { StatusContext } from '../../context/Status';
 import { useTranslation } from 'react-i18next';
 import { SiDiscord } from 'react-icons/si';
 
-const RegisterForm = () => {
+const StandardRegisterForm = () => {
   let navigate = useNavigate();
   const { t } = useTranslation();
   const githubButtonTextKeyByState = {
@@ -781,8 +782,7 @@ const RegisterForm = () => {
         style={{ top: '50%', left: '-120px' }}
       />
       <div className='w-full max-w-sm mt-[60px]'>
-        {showEmailRegister ||
-        !hasOAuthRegisterOptions
+        {showEmailRegister || !hasOAuthRegisterOptions
           ? renderEmailRegisterForm()
           : renderOAuthOptions()}
         {renderWeChatLoginModal()}
@@ -799,6 +799,23 @@ const RegisterForm = () => {
         )}
       </div>
     </div>
+  );
+};
+
+const RegisterForm = () => {
+  const [state] = useContext(StatusContext);
+  let status = state?.status;
+  if (!status) {
+    try {
+      status = JSON.parse(localStorage.getItem('status') || '{}');
+    } catch {
+      status = {};
+    }
+  }
+  return status?.invitation_registration_enabled ? (
+    <InvitationRegisterForm status={status} />
+  ) : (
+    <StandardRegisterForm />
   );
 };
 

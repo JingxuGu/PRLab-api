@@ -23,3 +23,13 @@ No production test accounts were created. Frontend production build and Go binar
 Runtime database tests use SQLite; MySQL/PostgreSQL instances were not provisioned. New ORM definitions
 and conditional queries use GORM and nullable indexes compatible with all three supported dialects.
 No GPU was allocated for builds or acceptance tests.
+
+Email username update (`v0.13.2-prlab.6`): model/controller/router/service tests pass,
+including legacy account migration, transaction rollback on a collision, custom/admin name
+preservation and repeated migration. The frontend and Go production builds pass. HTTP acceptance
+on a private SQLite copy confirms an email longer than 20 characters is the actual approved
+username, the initial password can log in and be changed, and credential retry remains protected.
+Existing approved user IDs, password hashes, quotas and channel credentials remain identical.
+The six known bootstrap accounts and their tokens were removed in the copy, followed by two
+successful startups verifying migration idempotency, SQLite integrity and the pending-email unique
+index. No external email or GPU request was needed for this acceptance test.

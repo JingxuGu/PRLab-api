@@ -26,7 +26,7 @@ type AccountApplication struct {
 	ReviewedAt               int64   `json:"reviewed_at"`
 	ReviewedBy               int     `json:"reviewed_by"`
 	UserId                   int     `json:"user_id"`
-	Username                 string  `json:"username" gorm:"type:varchar(20)"`
+	Username                 string  `json:"username" gorm:"type:varchar(50)"`
 	NotificationStatus       string  `json:"notification_status" gorm:"type:varchar(16)"`
 	CredentialDeliveryStatus string  `json:"credential_delivery_status" gorm:"type:varchar(16)"`
 	DeliveryAttemptAt        int64   `json:"delivery_attempt_at"`
@@ -35,7 +35,7 @@ type AccountApplication struct {
 func SubmitAccountApplication(email string) (*AccountApplication, error) {
 	email = strings.ToLower(strings.TrimSpace(email))
 	var count int64
-	if err := DB.Unscoped().Model(&User{}).Where("LOWER(email) = ?", email).Count(&count).Error; err != nil {
+	if err := DB.Unscoped().Model(&User{}).Where("LOWER(email) = ? OR LOWER(username) = ?", email, email).Count(&count).Error; err != nil {
 		return nil, err
 	}
 	if count > 0 {
@@ -87,7 +87,7 @@ func ReviewAccountApplication(id, reviewer, quota int, approve bool) (*AccountAp
 		}
 		if approve {
 			var count int64
-			if err := tx.Unscoped().Model(&User{}).Where("LOWER(email) = ?", application.Email).Count(&count).Error; err != nil {
+			if err := tx.Unscoped().Model(&User{}).Where("LOWER(email) = ? OR LOWER(username) = ?", application.Email, application.Email).Count(&count).Error; err != nil {
 				return err
 			}
 			if count > 0 {
@@ -97,7 +97,7 @@ func ReviewAccountApplication(id, reviewer, quota int, approve bool) (*AccountAp
 			if _, err := rand.Read(random); err != nil {
 				return err
 			}
-			username := "acct_" + hex.EncodeToString(random[:5])
+			username := application.Email
 			password = base64.RawURLEncoding.EncodeToString(random[5:17])
 			hash, err := common.Password2Hash(password)
 			if err != nil {
@@ -160,4 +160,64 @@ func RetryApplicationCredentials(id int) (*AccountApplication, string, error) {
 		return nil, "", err
 	}
 	return &application, password, nil
+}
+
+// Upgrade only approved accounts still using their generated legacy acct_ name.
+// A single transaction preserves credentials/quotas and fails safely on collisions.
+func MigrateApplicationEmailUsernames() error {
+	return DB.Transaction(func(tx *gorm.DB) error {
+		var applications []AccountApplication
+		if err := tx.Where("status = ? AND user_id > 0", "approved").Find(&applications).Error; err != nil {
+			return err
+		}
+		for _, application := range applications {
+			var user User
+			if err := tx.First(&user, application.UserId).Error; err != nil {
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					continue
+				}
+				return err
+			}
+			if user.Role != common.RoleCommonUser {
+				continue
+			}
+			email := strings.ToLower(strings.TrimSpace(user.Email))
+			if email == "" || len(email) > 50 || !strings.EqualFold(email, application.Email) {
+				continue
+			}
+			if user.Username == email {
+				if application.Username != email {
+					if err := tx.Model(&AccountApplication{}).Where("id = ?", application.Id).Update("username", email).Error; err != nil {
+						return err
+					}
+				}
+				continue
+			}
+			if user.Username != application.Username || !strings.HasPrefix(user.Username, "acct_") {
+				continue
+			}
+			var count int64
+			if err := tx.Unscoped().Model(&User{}).Where("LOWER(username) = ? AND id <> ?", email, user.Id).Count(&count).Error; err != nil {
+				return err
+			}
+			if count > 0 {
+				return ErrRegistrationConflict
+			}
+			updates := map[string]any{"username": email}
+			if user.DisplayName == user.Username {
+				updates["display_name"] = email
+			}
+			r := tx.Model(&User{}).Where("id = ? AND username = ?", user.Id, user.Username).Updates(updates)
+			if r.Error != nil {
+				return r.Error
+			}
+			if r.RowsAffected != 1 {
+				return ErrRegistrationConflict
+			}
+			if err := tx.Model(&AccountApplication{}).Where("id = ?", application.Id).Update("username", email).Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }

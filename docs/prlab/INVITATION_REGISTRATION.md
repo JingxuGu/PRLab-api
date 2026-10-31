@@ -7,7 +7,7 @@ replacing the previous invitation-only design. Upstream attribution and existing
 2. A pending `AccountApplication` reserves that normalized email. No user or password exists yet.
 3. The private administrator mailbox receives a review notification linking to `/console/user`.
 4. A root administrator approves or rejects the application. GET requests never approve accounts.
-5. Approval atomically creates an ordinary user with a randomly generated username, a 16-character
+5. Approval atomically creates an ordinary user whose username is the normalized registration email, a 16-character
    cryptographically random initial password, and the quota selected in the console.
 6. The username and initial password are emailed to the application address. The password is stored
    only as bcrypt; plaintext exists transiently for that mail attempt and is never returned by an API.
@@ -76,3 +76,11 @@ Back up the live database, private configuration and unit before switching. Veri
 policy and console before accepting applications; retain resource/device/network restrictions.
 After new applications arrive, do not roll back by overwriting the database with an older backup.
 Old invitation binaries do not implement the new application table; close registration before any rollback.
+
+## Email usernames
+
+Usernames and display names accept up to 50 characters, matching the existing email limit.
+Approved application accounts still using the generated `acct_` name migrate to their registered
+email at startup. This transaction preserves user ID, password hash, quota, role and tokens; it
+aborts on an existing username collision. Custom usernames and administrator accounts remain unchanged.
+The application record is updated with the same email username. Running the migration again is safe.

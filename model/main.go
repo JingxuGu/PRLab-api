@@ -296,7 +296,7 @@ func migrateDB() error {
 			return err
 		}
 	}
-	return nil
+	return MigrateApplicationEmailUsernames()
 }
 
 func migrateDBFast() error {
@@ -368,7 +368,7 @@ func migrateDBFast() error {
 		}
 	}
 	common.SysLog("database migrated")
-	return nil
+	return MigrateApplicationEmailUsernames()
 }
 
 func migrateLOGDB() error {

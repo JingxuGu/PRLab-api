@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "model": "qwen3.8-27b",
+  "model_ratio": 0,
+  "free_model_pre_consume": false,
+  "real_inference": "passed",
+  "token_usage_recorded": true,
+  "request_charged_quota": 0,
+  "wallet_quota_and_used_quota_unchanged": true,
+  "temporary_token_revoked": true,
+  "no_user_created": true,
+  "no_service_restarted": true
+}

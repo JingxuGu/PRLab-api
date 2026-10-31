@@ -42,3 +42,5 @@ MCP 使用原来的独立隧道，本仓库不包含其凭据和无关服务配�
 未改变缓存精度、0.90 显存预算或科研优先级。详见 [上下文验收](evidence/vllm/context-16k-verification.json)。
 
 2026-10-31 账号清理：六个初始化测试账号及六个令牌已删除；管理员用户名保留。旧网页会话统一失效一次，须重新登录。初始化模板改为仅创建管理员；验收使用临时管理员令牌并在结束时撤销。详见 [邮箱用户名发布记录](evidence/new-api/email-username-release.json)。
+
+2026-10-31 计费调整：当前 `qwen3.8-27b` 倍率为 0，关闭免费模型预扣；真实请求扣费为零且 token 用量正常记录。全局四并发与科研优先级保持原配置。详见 [零倍率验收](evidence/new-api/free-model-verification.json)。

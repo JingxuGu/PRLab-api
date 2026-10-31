@@ -35,7 +35,7 @@ settings={
  'QuotaForNewUser':'0','QuotaForInviter':'0','QuotaForInvitee':'0',
  'ModelRatio':json.dumps({'qwen3.8-27b':0}),
  'quota_setting.enable_free_model_pre_consume':'false',
- 'CompletionRatio':json.dumps({'qwen3.8-27b':1}),
+ 'CompletionRatio':json.dumps({'qwen3.8-27b':0}),
  'GroupRatio':json.dumps({'default':1}),'UserUsableGroups':json.dumps({'default':'实验室'}),
  'Notice':'科研任务优先。服务繁忙或资源调度期间，请稍后重试。',
 }

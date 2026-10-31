@@ -9,5 +9,7 @@
   "wallet_quota_and_used_quota_unchanged": true,
   "temporary_token_revoked": true,
   "no_user_created": true,
-  "no_service_restarted": true
+  "no_service_restarted": true,
+  "completion_ratio": 0,
+  "completion_ratio_admin_api_readback": "passed"
 }

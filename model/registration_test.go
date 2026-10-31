@@ -177,7 +177,7 @@ func TestEmailApprovalGeneratesOrdinaryCredentialsOnlyOnce(t *testing.T) {
 	approved, password, err := ReviewAccountApplication(req.Id, 1, 321, true)
 	require.NoError(t, err)
 	require.Len(t, password, 16)
-	require.Contains(t, approved.Username, "acct_")
+	require.Equal(t, req.Email, approved.Username)
 	require.Equal(t, "sending", approved.CredentialDeliveryStatus)
 	var user User
 	require.NoError(t, DB.First(&user, approved.UserId).Error)
@@ -243,4 +243,75 @@ func TestCredentialRetryCannotResetAnEstablishedAccount(t *testing.T) {
 	var application AccountApplication
 	require.NoError(t, DB.First(&application, req.Id).Error)
 	require.Equal(t, "failed", application.CredentialDeliveryStatus)
+}
+
+func TestLegacyApplicationUsernameMigrationPreservesIdentityAndIsIdempotent(t *testing.T) {
+	registrationDB(t)
+	hash, err := common.Password2Hash("FixturePassword123")
+	require.NoError(t, err)
+	user := User{Username: "acct_legacy", DisplayName: "acct_legacy", Email: "long.registration.email@example.org", Password: hash, Role: common.RoleCommonUser, Status: common.UserStatusEnabled, Quota: 12345, Group: "default", AffCode: "migration-fixture"}
+	require.NoError(t, DB.Create(&user).Error)
+	application := AccountApplication{Email: user.Email, Username: user.Username, UserId: user.Id, Status: "approved", CredentialDeliveryStatus: "sent"}
+	require.NoError(t, DB.Create(&application).Error)
+	require.NoError(t, MigrateApplicationEmailUsernames())
+	require.NoError(t, MigrateApplicationEmailUsernames())
+	var after User
+	require.NoError(t, DB.First(&after, user.Id).Error)
+	require.Equal(t, user.Email, after.Username)
+	require.Equal(t, user.Email, after.DisplayName)
+	require.Equal(t, hash, after.Password)
+	require.Equal(t, user.Quota, after.Quota)
+	require.Equal(t, user.Role, after.Role)
+	require.Equal(t, user.Id, after.Id)
+	after.Password = "FixturePassword123" // Validate submitted plaintext fields, not a stored bcrypt hash.
+	require.NoError(t, common.Validate.Struct(after))
+	require.NoError(t, DB.First(&application, application.Id).Error)
+	require.Equal(t, after.Username, application.Username)
+}
+
+func TestEmailUsernameCollisionDoesNotApproveOrOverwriteAnotherAccount(t *testing.T) {
+	registrationDB(t)
+	existing := User{Username: "collision@example.org", Email: "another@example.org", Password: "fixture-hash", Role: common.RoleCommonUser, Status: common.UserStatusEnabled, AffCode: "collision-owner"}
+	require.NoError(t, DB.Create(&existing).Error)
+	_, err := SubmitAccountApplication("collision@example.org")
+	require.ErrorIs(t, err, ErrApplicationEmailRegistered)
+	req := AccountApplication{Email: "collision@example.org", Status: "pending"}
+	require.NoError(t, DB.Create(&req).Error)
+	_, password, err := ReviewAccountApplication(req.Id, 1, 100, true)
+	require.Error(t, err)
+	require.Empty(t, password)
+	var after AccountApplication
+	require.NoError(t, DB.First(&after, req.Id).Error)
+	require.Equal(t, "pending", after.Status)
+	var untouched User
+	require.NoError(t, DB.First(&untouched, existing.Id).Error)
+	require.Equal(t, existing.Email, untouched.Email)
+	require.Equal(t, existing.Password, untouched.Password)
+}
+
+func TestEmailUsernameMigrationRollsBackOnCollisionAndPreservesCustomNames(t *testing.T) {
+	registrationDB(t)
+	legacy := User{Username: "acct_first", DisplayName: "acct_first", Email: "first@example.org", Role: common.RoleCommonUser, AffCode: "first"}
+	blocked := User{Username: "acct_blocked", Email: "blocked@example.org", Role: common.RoleCommonUser, AffCode: "blocked"}
+	collision := User{Username: blocked.Email, Email: "other@example.org", Role: common.RoleCommonUser, AffCode: "other"}
+	custom := User{Username: "custom", DisplayName: "Custom Name", Email: "custom@example.org", Role: common.RoleCommonUser, AffCode: "custom"}
+	admin := User{Username: "acct_admin", Email: "admin@example.org", Role: common.RoleRootUser, AffCode: "admin"}
+	for _, user := range []*User{&legacy, &blocked, &collision, &custom, &admin} {
+		require.NoError(t, DB.Create(user).Error)
+	}
+	for _, user := range []User{legacy, blocked, custom, admin} {
+		require.NoError(t, DB.Create(&AccountApplication{Email: user.Email, Username: user.Username, UserId: user.Id, Status: "approved"}).Error)
+	}
+	require.ErrorIs(t, MigrateApplicationEmailUsernames(), ErrRegistrationConflict)
+	var after User
+	require.NoError(t, DB.First(&after, legacy.Id).Error)
+	require.Equal(t, legacy.Username, after.Username)
+	require.NoError(t, DB.Unscoped().Delete(&collision).Error)
+	require.NoError(t, MigrateApplicationEmailUsernames())
+	for _, user := range []User{custom, admin} {
+		var retained User
+		require.NoError(t, DB.First(&retained, user.Id).Error)
+		require.Equal(t, user.Username, retained.Username)
+		require.Equal(t, user.DisplayName, retained.DisplayName)
+	}
 }

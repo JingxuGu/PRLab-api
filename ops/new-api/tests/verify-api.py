@@ -1,4 +1,10 @@
+import argparse
 import asyncio
+from contextlib import contextmanager
+import http.cookiejar
+import os
+import secrets
+import urllib.request
 import base64
 import io
 import json
@@ -9,7 +15,50 @@ import httpx
 from PIL import Image, ImageDraw
 
 BASE = Path('/home/llmops/new-api')
-KEYS = [v['api_key'] for k,v in json.loads((BASE / 'config/initial-credentials.json').read_text()).items() if k != 'example-admin']
+# Tests use one short-lived administrator-owned token; no bootstrap users are needed.
+API_KEY = None
+SMOKE = False
+
+@contextmanager
+def maintenance_token():
+    op = urllib.request.build_opener(urllib.request.ProxyHandler({}),
+        urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+    admin = json.loads((BASE / 'config/initial-credentials.json').read_text())['example-admin']
+    uid = None
+    name = 'maintenance-' + secrets.token_hex(6)
+    tid = None
+    def request(path, data=None, method=None):
+        headers = {'Content-Type': 'application/json'}
+        if uid is not None:
+            headers['New-Api-User'] = str(uid)
+        q = urllib.request.Request(URL + path, data=None if data is None else json.dumps(data).encode(),
+                                   headers=headers, method=method)
+        with op.open(q, timeout=30) as r:
+            result = json.load(r)
+        if not result.get('success'):
+            raise RuntimeError('Maintenance operation failed: ' + path)
+        return result.get('data')
+    def tokens():
+        data = request('/api/token/?p=1&page_size=100')
+        return data.get('items', []) if isinstance(data, dict) else data
+    try:
+        login = request('/api/user/login', {'username': admin['username'], 'password': admin['password']})
+        uid = login['id']
+        if login['role'] != 100:
+            raise RuntimeError('Root administrator required')
+        request('/api/token/', {'name': name, 'expired_time': int(time.time()) + 900,
+            'remain_quota': 100000, 'unlimited_quota': False, 'model_limits_enabled': True,
+            'model_limits': MODEL, 'group': 'default', 'cross_group_retry': False})
+        tid = next(t['id'] for t in tokens() if t['name'] == name)
+        yield 'sk-' + request(f'/api/token/{tid}/key', {})['key']
+    finally:
+        if uid is not None:
+            # Also find a token if creation succeeded but the following response was interrupted.
+            if tid is None:
+                tid = next((t['id'] for t in tokens() if t['name'] == name), None)
+            if tid is not None:
+                request(f'/api/token/{tid}', method='DELETE')
+            request('/api/user/logout')
 MODEL = 'qwen3.8-27b'
 URL = 'http://127.0.0.1:3001'
 
@@ -30,7 +79,7 @@ def body(content, max_tokens=128):
             'chat_template_kwargs': {'enable_thinking': False}}
 
 def auth(i=0):
-    return {'Authorization': 'Bearer ' + KEYS[i]}
+    return {'Authorization': 'Bearer ' + API_KEY}
 
 async def main():
     result = {}
@@ -47,6 +96,9 @@ async def main():
         assert '2' in answer, answer
         result['text'] = {'passed': True, 'answer': answer, 'usage': r.json().get('usage')}
         print('PASS real text generation:', answer, flush=True)
+        if SMOKE:
+            (BASE / 'config/api-smoke-verification.json').write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
+            return
         r = await client.post('/v1/chat/completions', headers=auth(), json=body([
             {'type': 'image_url', 'image_url': {'url': fixture()}},
             {'type': 'text', 'text': '图片左边的方块是什么颜色，右边的圆是什么颜色？用中文简短回答。'},
@@ -97,7 +149,7 @@ async def main():
         result['concurrency'] = {'passed': True, 'maximum_active': maximum, 'fifth_status': fifth_status,
                                  'four_request_seconds': round(time.monotonic() - start, 2),
                                  'usage': [r.json().get('usage') for r in responses]}
-        print('PASS four real requests across four API keys; fifth key receives 429', flush=True)
+        print('PASS four real requests; fifth request receives 429 (global gateway limit)', flush=True)
 
         async with client.stream('POST', '/v1/chat/completions', headers=auth(),
                                  json={**body('请用一句中文介绍你自己。', 64), 'stream': True}) as stream:
@@ -109,4 +161,13 @@ async def main():
 
     (BASE / 'config/api-verification.json').write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
 
-asyncio.run(main())
+if __name__ == '__main__':
+    os.umask(0o077)
+    parser = argparse.ArgumentParser(description='Uses real inference; no demo users are created.')
+    parser.add_argument('--smoke', action='store_true', help='Only authentication, models and one short text request')
+    SMOKE = parser.parse_args().smoke
+    with maintenance_token() as key:
+        API_KEY = key
+        asyncio.run(main())
+    API_KEY = None
+    print('PASS: temporary maintenance token revoked; no user created', flush=True)

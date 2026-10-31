@@ -1,0 +1,23 @@
+{
+  "version": "v0.13.2-prlab.6",
+  "source_commit": "e6001f88702229e67f8e31a79d5eeb19f611f625",
+  "source_merge_commit": "ffb0198834e2f152910e3f295a76cc7154ce55bb",
+  "binary_sha256": "4e80dafa7eb6bb481587041743108b7b358a1a8bc11318c7f1756f4aa87a9ec6",
+  "email_username": true,
+  "legacy_account_migration_preserves_password_id_quota_role": true,
+  "bootstrap_users_removed": 6,
+  "bootstrap_tokens_revoked": 6,
+  "browser_sessions_invalidated": true,
+  "crypto_secret_preserved": true,
+  "database_private_backup_created": true,
+  "private_copy_http_application_login_password_change_and_delivery_retry": "passed",
+  "private_copy_repeated_startup_and_pending_email_unique_index": "passed",
+  "production_test_users_created": 0,
+  "production_temporary_maintenance_token": "revoked_after_one_short_text",
+  "gpu_job_restarted": false,
+  "runtime_database_tests": "SQLite only; MySQL/PostgreSQL not provisioned",
+  "public_status_and_registration_page": "passed",
+  "live_users_after_cleanup": 2,
+  "live_active_tokens_after_smoke": 0,
+  "model_service_and_slurm_job_preserved": true
+}
